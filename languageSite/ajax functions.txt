@@ -1,0 +1,14 @@
+
+
+-create new language
+
+-create new category (language)
+
+-create new expression (language, epxpression?   )
+
+-load languages
+
+- load categories (language)
+
+
+

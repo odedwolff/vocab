@@ -1,0 +1,12 @@
+-implement create category 
+
+-extend add expression:
+	enable adding category
+	enable add expression with it translation (is it actually the only way to create the connection to the translation? )
+	
+	
+	
+-add empty item to top of lists, to make clear that no itam is selected upon updating of list options 
+update: this is not just awkward, it also creates a bug, because the current language 
+selection is only set at change, so if the first item in the list is selected, 
+it doesnt make a change, and the current selection is not bening updated 

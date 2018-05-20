@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+	
+	
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		
+	</head>
+	<body>
+		<div id="add language">
+			add language: 
+			<input type="text" id="languageInput" />
+			<button id="submitLanguage">submit
+			
+			</button>
+		</div>
+		
+		<div id="load languages">
+			load Languages
+			
+			<button id="loadLangButton">submit
+			
+			</button>
+		</div>
+		
+		<!--
+		<div id="languagesList">
+			available languages
+			<select name="languages" id="langList">
+				
+			</select>
+		</div>
+		-->
+		
+		<div id="languagesList">
+			language source 
+			<select name="languages" id="langList">
+				
+			</select>
+		</div>
+		
+		
+		<div id="languagesListTarget">
+			language target 
+			<select name="languagesTarget" id="langListTarget">
+				
+			</select>
+		</div>
+		
+		
+		<div>
+			<div id="newExpression">
+				new expression
+				<input type="text" id="newExpressionText" />
+			</div>
+			<div id="newExpressionTarget">
+				new expression target
+				<input type="text" id="newExpressionTargetText" />
+			</div>
+			<button id=submitExpression>submit single</button>
+			<button id=submitExpressionWTrx>submit full</button>
+		</div>
+		
+		
+		
+			
+		
+		<script>
+		
+			var loadedLists = {
+				languages: null, 
+				categories: null
+				
+			}
+			
+			var currentSelections = {
+				language:null, 
+				category: null,
+				languageTarget: null
+			}
+			
+			/**
+			populateLanguagesData(langs){
+				var dict = {};
+				for (int i = 0 ;i < langs.length ; i++){
+					dict[i] = langs[i]
+				}
+			
+			}
+			**/
+		
+		
+			function debugQuick(msg){
+				console.log(msg);
+				alert(msg);
+			}
+			
+			
+			function submmitLanguage(){
+				
+				
+				
+				langStr = $("#languageInput").val();
+				//validate new language input
+				if(!langStr || langStr===""){
+					debugQuick("empty or null language value");
+					return;
+				}
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'lang': langStr
+				}
+				
+				$.ajax({
+				  url:'http://localhost:8000/vocab/add-language',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(data);
+				  }
+				});
+			
+			}
+			
+			function loadLangButton(){
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}"
+				}
+				
+				$.ajax({
+				  url:'http://localhost:8000/vocab/load-languages',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
+					//debugQuick(data);
+					populateLanguagesListBox(data.loadedLangs);
+					//populateLanguagesData(data.loadedLangs);
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(data);
+				  }
+				});
+			
+			}
+			
+			//<option value="volvo">Volvo</option>
+			function populateLanguagesListBox(languages){
+				var $list = $("#langList");
+				var $listTarget = $("#langListTarget");
+				
+				$list.empty();
+				$listTarget.empty();
+				
+				currentSelections.language = null;
+				currentSelections.languageTarget = null;
+				
+				
+				
+				for(i = 0; i < languages.length; i++){
+					var newLelm = "<option value='" + languages[i].id + "'>" + languages[i].lang + "</option>";
+					$list.append(newLelm);
+					$listTarget.append(newLelm);
+				}
+				currentSelections.language = null;
+			}
+			
+			
+			function submitExpression(){
+				newExpreesion = $("#newExpressionText").val();
+				if (currentSelections.language == null || newExpreesion == null || newExpreesion == ""){
+					debugQuick("please make sure that epxresson is not empty and langaue is selected");
+					return;
+				}
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'expression': newExpreesion, 
+					'languageID' : currentSelections.language
+				}
+				
+				$.ajax({
+				  url:'http://localhost:8000/vocab/add-expression',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(data);
+				  }
+				});
+			
+			}
+			
+			function submitExpressionFull(){
+				var newExpreesion = $("#newExpressionText").val();
+				var newExpressionTarget = $("#newExpressionTargetText").val();
+				if (currentSelections.language == null || newExpreesion == null || newExpreesion == "" ||
+				currentSelections.languageTarget == null || newExpressionTarget == null || newExpressionTarget == ""
+				
+				){
+					debugQuick("please make sure that epxresson is not empty and langaue is selected for both source and target");
+					return;
+				}
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'expression1': newExpreesion, 
+					'languageID1' : currentSelections.language, 
+					'expression2': newExpressionTarget, 
+					'languageID2' : currentSelections.languageTarget
+				}
+				
+				$.ajax({
+				  url:'http://localhost:8000/vocab/add-expressions-full',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(error);
+				  }
+				});
+			
+			}
+			
+		
+			//set up liseterners 
+			$("#submitLanguage").click(
+				submmitLanguage
+			);
+			
+			$("#loadLangButton").click(
+				loadLangButton
+			);
+			
+			
+			$("#langList").change(
+				function(){
+					//var selectedLanguageID = $(this).find('option:selected').text();
+					var selectedLanguageID = $(this).find('option:selected').val();
+					currentSelections.language = selectedLanguageID;
+				}
+			);
+			
+			$("#languagesListTarget").change(
+				function(){
+					//var selectedLanguageID = $(this).find('option:selected').text();
+					var selectedLanguageID = $(this).find('option:selected').val();
+					currentSelections.languageTarget = selectedLanguageID;
+				}
+			);
+			
+			
+			$("#submitExpression").click(submitExpression);
+			$("#submitExpressionWTrx").click(submitExpressionFull);
+			
+			
+			
+			
+			
+			
+			
+			
+		</script>
+	</body>
+</html>
