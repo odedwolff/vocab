@@ -22,16 +22,7 @@
 			
 			</button>
 		</div>
-		
-		<!--
-		<div id="languagesList">
-			available languages
-			<select name="languages" id="langList">
-				
-			</select>
-		</div>
-		-->
-		
+			
 		<div id="languagesList">
 			language source 
 			<select name="languages" id="langList">
@@ -67,10 +58,14 @@
 		
 		<script>
 		
+			/**
+			todo - each language should probably have its own categries, a category should be a subset of a language (consider 
+			rename simply to "subsest" or simlirly )
+			**/
+			
 			var loadedLists = {
 				languages: null, 
 				categories: null
-				
 			}
 			
 			var currentSelections = {
@@ -79,27 +74,17 @@
 				languageTarget: null
 			}
 			
-			/**
-			populateLanguagesData(langs){
-				var dict = {};
-				for (int i = 0 ;i < langs.length ; i++){
-					dict[i] = langs[i]
-				}
 			
-			}
-			**/
-		
-		
 			function debugQuick(msg){
 				console.log(msg);
 				alert(msg);
 			}
 			
 			
+			/**
+			sensds request to server to add a new language 
+			**/
 			function submmitLanguage(){
-				
-				
-				
 				langStr = $("#languageInput").val();
 				//validate new language input
 				if(!langStr || langStr===""){
@@ -129,8 +114,12 @@
 			
 			}
 			
+			/**
+			sends a request to server to load all languages, than populates all the languages recived in the reply and populates them 
+			in lists of available languages 
+			**/
+			
 			function loadLangButton(){
-				
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}"
 				}
@@ -140,32 +129,26 @@
 				  type:'POST',
 				  data:post_data,
 				  success:function(data){
-					//console.log(data);
-					//debugQuick(data);
 					populateLanguagesListBox(data.loadedLangs);
-					//populateLanguagesData(data.loadedLangs);
 				  },
 				  error:function(error){
-					//console.log(error);
 					debugQuick(data);
 				  }
 				});
 			
 			}
 			
-			//<option value="volvo">Volvo</option>
+			
+			/**
+			buils 2 similar lists of languages, one for source and one for target of translation 
+			**/
 			function populateLanguagesListBox(languages){
 				var $list = $("#langList");
 				var $listTarget = $("#langListTarget");
-				
 				$list.empty();
 				$listTarget.empty();
-				
 				currentSelections.language = null;
 				currentSelections.languageTarget = null;
-				
-				
-				
 				for(i = 0; i < languages.length; i++){
 					var newLelm = "<option value='" + languages[i].id + "'>" + languages[i].lang + "</option>";
 					$list.append(newLelm);
@@ -175,6 +158,9 @@
 			}
 			
 			
+			/**
+			sends new expression to server to be saved 
+			**/
 			function submitExpression(){
 				newExpreesion = $("#newExpressionText").val();
 				if (currentSelections.language == null || newExpreesion == null || newExpreesion == ""){
@@ -193,29 +179,29 @@
 				  type:'POST',
 				  data:post_data,
 				  success:function(data){
-					//console.log(data);
 					debugQuick(data);
 					
 				  },
 				  error:function(error){
-					//console.log(error);
 					debugQuick(data);
 				  }
 				});
 			
 			}
 			
+			/**
+			submits a pair of expressions that make a translation to server to be saved 
+			**/
+			
 			function submitExpressionFull(){
 				var newExpreesion = $("#newExpressionText").val();
 				var newExpressionTarget = $("#newExpressionTargetText").val();
 				if (currentSelections.language == null || newExpreesion == null || newExpreesion == "" ||
 				currentSelections.languageTarget == null || newExpressionTarget == null || newExpressionTarget == ""
-				
 				){
 					debugQuick("please make sure that epxresson is not empty and langaue is selected for both source and target");
 					return;
 				}
-				
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
 					'expression1': newExpreesion, 
@@ -223,7 +209,6 @@
 					'expression2': newExpressionTarget, 
 					'languageID2' : currentSelections.languageTarget
 				}
-				
 				$.ajax({
 				  url:'http://localhost:8000/vocab/add-expressions-full',
 				  type:'POST',
@@ -238,11 +223,12 @@
 					debugQuick(error);
 				  }
 				});
-			
 			}
 			
 		
-			//set up liseterners 
+			/**
+			set up liseterners 
+			**/
 			$("#submitLanguage").click(
 				submmitLanguage
 			);
@@ -268,14 +254,8 @@
 				}
 			);
 			
-			
 			$("#submitExpression").click(submitExpression);
 			$("#submitExpressionWTrx").click(submitExpressionFull);
-			
-			
-			
-			
-			
 			
 			
 			
