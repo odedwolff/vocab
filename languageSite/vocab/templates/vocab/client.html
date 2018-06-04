@@ -53,6 +53,15 @@
 		</div>
 		
 		
+		<div>
+			<div id="newUser">
+				new user
+				<input type="text" id="newUserText" />
+			</div>	
+			<button id=btnAddUser>submit user</button>
+		</div>
+		
+		
 		
 			
 		
@@ -108,7 +117,36 @@
 				  },
 				  error:function(error){
 					//console.log(error);
+					debugQuick(error.responseText);
+				  }
+				});
+			
+			}
+			
+			
+			function addNewUser(){
+				var userName = $("#newUserText").val();
+				if(!userName || userName===""){
+					debugQuick("empty or null userName value");
+					return;
+				}
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'userName': userName
+				}
+				
+				$.ajax({
+				  url:'http://localhost:8000/vocab/add-user',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
 					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(error.responseText);
 				  }
 				});
 			
@@ -132,7 +170,7 @@
 					populateLanguagesListBox(data.loadedLangs);
 				  },
 				  error:function(error){
-					debugQuick(data);
+					debugQuick(error.responseText);
 				  }
 				});
 			
@@ -183,7 +221,7 @@
 					
 				  },
 				  error:function(error){
-					debugQuick(data);
+					debugQuick(error.responseText);
 				  }
 				});
 			
@@ -220,7 +258,7 @@
 				  },
 				  error:function(error){
 					//console.log(error);
-					debugQuick(error);
+					debugQuick(error.responseText);
 				  }
 				});
 			}
@@ -236,6 +274,13 @@
 			$("#loadLangButton").click(
 				loadLangButton
 			);
+			
+			$("#btnAddUser").click(
+				addNewUser
+			);
+			
+			
+			
 			
 			
 			$("#langList").change(

@@ -2,11 +2,13 @@ from django.shortcuts import render
 
 from django.http import JsonResponse
 
-from .models import Expression, Language
+from .models import Expression, Language, User
 
 from django.views.decorators.csrf import csrf_exempt
 
 from django.http import HttpResponse, HttpResponseServerError
+
+from django.db import IntegrityError
 
 import json
 
@@ -46,7 +48,7 @@ def addExpression(request):
 	if saved:
 		return HttpResponse("expression saved")	
 	else: 
-		HttpResponseServerError("expression failed to save")	
+		return HttpResponseServerError("expression failed to save")	
 		
 		
 	
@@ -68,7 +70,24 @@ def addExpressionFull(request):
 		return HttpResponse("expressions pair saved")	
 	else:
 		return HttpResponseServerError("expressions pair failed to save")	
+
+		
+		
+def addUser(request):
+	"""
+	handels http request to add a new user 
 	
+	"""
+	try:
+		userName = request.POST["userName"]
+		saved = saveUser(userName)
+		return HttpResponse("user saved")
+	except IntegrityError:
+		return HttpResponseServerError("integrity error, possibly duplicate user name")
+	except Excption as e:
+		return HttpResponseServerError(e.message)	
+			
+
 	
 def loadLanguages (request):
 	"""
@@ -102,6 +121,15 @@ def saveNewLanguage(languageName):
 	"""
 	lang = Language(language = languageName)
 	lang.save()
+	
+	
+def saveUser(userName):
+	"""
+	saves new user in database 
+	"""
+	user = User(name = userName)
+	user.save()
+
 	
 
 def saveExpression (expression, languageId, categoriesIds):
