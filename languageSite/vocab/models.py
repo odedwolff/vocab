@@ -5,10 +5,17 @@ from django.db import models
 from django.db import models
 
 class User(models.Model):
+	#the user name, also the login name 
 	name = models.CharField(max_length=200, unique=True)
+	
+	#hash value of user's password
+	passHash =  models.CharField(max_length=200)
+	
 	
 	def __str__(self):
 		return self.name
+		
+	
 	
 	
 class Language(models.Model):
