@@ -10,6 +10,8 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from django.db import IntegrityError
 
+from passlib.apps import custom_app_context as pwd_context
+
 import json
 
 
@@ -73,20 +75,21 @@ def addExpressionFull(request):
 
 		
 		
-def addUser(request):
+def registerUser(request):
 	"""
 	handels http request to add a new user 
 	
 	"""
 	try:
 		userName = request.POST["userName"]
-		saved = saveUser(userName)
+		password = request.POST["password"]
+		hash = hashPass(password)
+		saved = saveUser(userName, hash)
 		return HttpResponse("user saved")
 	except IntegrityError:
 		return HttpResponseServerError("integrity error, possibly duplicate user name")
-	except Excption as e:
-		return HttpResponseServerError(e.message)	
-			
+	except Exception as e:
+		return HttpResponseServerError("server error" + str(e))	
 
 	
 def loadLanguages (request):
@@ -123,11 +126,11 @@ def saveNewLanguage(languageName):
 	lang.save()
 	
 	
-def saveUser(userName):
+def saveUser(userName, hash):
 	"""
 	saves new user in database 
 	"""
-	user = User(name = userName)
+	user = User(name = userName, passHash = hash)
 	user.save()
 
 	
@@ -194,7 +197,9 @@ def saveTrxPair(languageId1, expression1, categories1, languageId2, expression2,
 	newExp1.save()
 	return True 
 	
-	
+
+def hashPass(password):
+	return pwd_context.hash("somepass")
 	
 	
 	

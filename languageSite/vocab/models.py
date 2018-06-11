@@ -9,7 +9,7 @@ class User(models.Model):
 	name = models.CharField(max_length=200, unique=True)
 	
 	#hash value of user's password
-	passHash =  models.CharField(max_length=200)
+	passHash =  models.CharField(max_length=200, null = True)
 	
 	
 	def __str__(self):
