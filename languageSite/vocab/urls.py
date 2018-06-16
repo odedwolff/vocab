@@ -10,5 +10,7 @@ urlpatterns = [
 	path('add-expression', views.addExpression, name='addExpression'), 
 	path('add-expressions-full', views.addExpressionFull, name='addExpressionFull'),
 	path('register-user', views.registerUser, name='registerUser'), 
+	path('get-logon-status', views.getLogOnStatus, name='getLogonStatus') 
+	
 	
 ]

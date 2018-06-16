@@ -15,6 +15,11 @@ from passlib.apps import custom_app_context as pwd_context
 import json
 
 
+KEY_SESSION_LOGGED_USER = "loggedUser"
+
+def log(msg, imortance = 0):
+	print(msg)
+
 
 def client (request):
 	"""
@@ -80,18 +85,51 @@ def registerUser(request):
 	handels http request to add a new user 
 	
 	"""
+	log("entering registerUser()")
 	try:
 		userName = request.POST["userName"]
 		password = request.POST["password"]
 		hash = hashPass(password)
-		saved = saveUser(userName, hash)
-		return HttpResponse("user saved")
+		#saved = saveUser(userName, hash)
+		userId = saveUser(userName, hash)
+		#registering also logs the user on
+		request.session[KEY_SESSION_LOGGED_USER] = userId
+		#return HttpResponse("user registered and logged on")
+		
+		#log("user registered and logged on")
+		result = {"success":True}
+		log("returning sucess")
+		return JsonResponse(result, safe=False)
+		
 	except IntegrityError:
+		log("returning integrity error")
 		return HttpResponseServerError("integrity error, possibly duplicate user name")
 	except Exception as e:
+		log("returning server error: " + str(e))
 		return HttpResponseServerError("server error" + str(e))	
 
-	
+		
+		
+		
+def getLogOnStatus(request):
+	"""
+	seponds over http regarding login status of sending browser
+	"""
+	log("entering registerUser()")
+	userId = request.session[KEY_SESSION_LOGGED_USER]
+	username = False
+	isLogged = "False"
+	if userId is not None:
+		isLogged = True
+		username = User.objects.get(pk= userId).name
+	log("islogged=" + str(isLogged) + "; username= " + str(username))
+	result = {"isLogged":isLogged,"username": username }
+	return JsonResponse(result, safe=False)
+		
+
+
+
+		
 def loadLanguages (request):
 	"""
 	loads a list of all languages 
@@ -132,7 +170,7 @@ def saveUser(userName, hash):
 	"""
 	user = User(name = userName, passHash = hash)
 	user.save()
-
+	return user.id
 	
 
 def saveExpression (expression, languageId, categoriesIds):

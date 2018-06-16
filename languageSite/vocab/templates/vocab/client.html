@@ -54,12 +54,23 @@
 		
 		
 		<div>
+			register user
 			<div id="newUser">
-				new user
+				user name
 				<input type="text" id="newUserText" />
+				password
+				<input type="text" id="newUserPassWordText" />
 			</div>	
-			<button id=btnAddUser>submit user</button>
+			<button id=btnAddUser>submit</button>
 		</div>
+		
+		<div>
+			get logged in user info 
+			<button id=btnLoggedInUserInfo>go</button>
+			
+		</div>
+		
+		
 		
 		
 		
@@ -130,13 +141,17 @@
 					debugQuick("empty or null userName value");
 					return;
 				}
+				var password = $("#newUserPassWordText").val();
+				
+				
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
-					'userName': userName
+					'userName': userName,
+					'password': password
 				}
 				
 				$.ajax({
-				  url:'http://localhost:8000/vocab/add-user',
+				  url:'http://localhost:8000/vocab/register-user',
 				  type:'POST',
 				  data:post_data,
 				  success:function(data){
@@ -227,6 +242,31 @@
 			
 			}
 			
+			
+			/**
+			sends a requet for logged on user form current browser
+			**/
+			function sendGetLoginInfo(){
+				url = 'http://localhost:8000/vocab/get-logon-status'
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}"
+				}
+				
+				$.ajax({
+				  url: url,
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					debugQuick(error.responseText);
+				  }
+				});
+			}
+			
+			
 			/**
 			submits a pair of expressions that make a translation to server to be saved 
 			**/
@@ -299,8 +339,11 @@
 				}
 			);
 			
+			
 			$("#submitExpression").click(submitExpression);
 			$("#submitExpressionWTrx").click(submitExpressionFull);
+			$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
+			
 			
 			
 			
