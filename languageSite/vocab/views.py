@@ -10,12 +10,19 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from django.db import IntegrityError
 
-from passlib.apps import custom_app_context as pwd_context
+#from passlib.apps import custom_app_context as pwd_context
+
+from passlib.hash import pbkdf2_sha256
 
 import json
 
 
+
+
 KEY_SESSION_LOGGED_USER = "loggedUser"
+ERROR_CODE_NO_SUCH_USER = 5001
+ERROR_CODE_PASSWORD_DONT_MATCH = 5002
+
 
 def log(msg, imortance = 0):
 	print(msg)
@@ -87,16 +94,14 @@ def registerUser(request):
 	"""
 	log("entering registerUser()")
 	try:
+		
 		userName = request.POST["userName"]
 		password = request.POST["password"]
+		log("args:username,password=" + userName +"," +  password)
+		log("password, len(pass)=" + password + ";" + str(len(password)))
 		hash = hashPass(password)
-		#saved = saveUser(userName, hash)
 		userId = saveUser(userName, hash)
-		#registering also logs the user on
 		request.session[KEY_SESSION_LOGGED_USER] = userId
-		#return HttpResponse("user registered and logged on")
-		
-		#log("user registered and logged on")
 		result = {"success":True}
 		log("returning sucess")
 		return JsonResponse(result, safe=False)
@@ -110,6 +115,33 @@ def registerUser(request):
 
 		
 		
+def logUserOn(request):
+	"""
+	handels http request to log in an existing uer  
+	
+	"""
+	log("entering logUserin()")
+	userName = request.POST["userName"]
+	password = request.POST["password"]
+	loadedUsers = User.objects.filter(name = userName)
+	if len(loadedUsers) == 0 :
+		log("no such user")
+		result = {"success":False, "errorCode":ERROR_CODE_NO_SUCH_USER}
+		return JsonResponse(result, safe=False)
+	
+	loadedUser = loadedUsers[0]
+	savedHash = loadedUser.passHash
+	
+	match =  pbkdf2_sha256.verify(password, savedHash)
+	if not match:
+		log("password is not correct")
+		result = {"success":False, "errorCode":ERROR_CODE_PASSWORD_DONT_MATCH}
+		return JsonResponse(result, safe=False)
+	
+	log("log in credentidals correct")
+	request.session[KEY_SESSION_LOGGED_USER] = loadedUser.id
+	result = {"success":True}
+	return JsonResponse(result, safe=False)
 		
 def getLogOnStatus(request):
 	"""
@@ -128,6 +160,10 @@ def getLogOnStatus(request):
 		
 
 
+		
+		
+		
+		
 
 		
 def loadLanguages (request):
@@ -237,7 +273,6 @@ def saveTrxPair(languageId1, expression1, categories1, languageId2, expression2,
 	
 
 def hashPass(password):
-	return pwd_context.hash("somepass")
-	
+	return pbkdf2_sha256.hash(password)
 	
 	

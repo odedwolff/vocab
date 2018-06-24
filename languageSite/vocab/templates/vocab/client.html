@@ -65,6 +65,18 @@
 		</div>
 		
 		<div>
+			log user on
+			<div id="newUser">
+				user name
+				<input type="text" id="logUesrText" />
+				password
+				<input type="text" id="logPassText" />
+			</div>	
+			<button id=btnLogOn>submit</button>
+		</div>
+		
+		
+		<div>
 			get logged in user info 
 			<button id=btnLoggedInUserInfo>go</button>
 			
@@ -171,6 +183,37 @@
 				});
 			
 			}
+			
+			
+			
+			function sendLogOn(){
+				//TODO - add verficiations for username and password 
+				userName=$("#logUesrText").val();
+				password=$("#logPassText").val();
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'userName': userName,
+					'password': password
+				}
+				
+				$.ajax({
+				  
+				  url:HOST + '/vocab/log-user-on',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(error.responseText);
+				  }
+				});
+			
+			}
+			
 			
 			/**
 			sends a request to server to load all languages, than populates all the languages recived in the reply and populates them 
@@ -351,7 +394,7 @@
 			$("#submitExpression").click(submitExpression);
 			$("#submitExpressionWTrx").click(submitExpressionFull);
 			$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
-			
+			$("#btnLogOn").click(sendLogOn);
 			
 			
 			
