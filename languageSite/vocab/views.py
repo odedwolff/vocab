@@ -142,6 +142,13 @@ def logUserOn(request):
 	request.session[KEY_SESSION_LOGGED_USER] = loadedUser.id
 	result = {"success":True}
 	return JsonResponse(result, safe=False)
+	
+def logUserOff(request):
+	#TODO - handle errors 
+	request.session[KEY_SESSION_LOGGED_USER] = None
+	result = {"success":True}
+	return JsonResponse(result, safe=False)
+	
 		
 def getLogOnStatus(request):
 	"""

@@ -85,7 +85,7 @@
 		</div>
 		
 		<div id=divLoggedUser class="panel1" >
-			logged on User: <div  id=divLoggedUserName>
+			logged on User: <div  id=divLoggedUserName></div>
 			<button id=btnLogOff>log off</button>
 		</div>
 		
@@ -125,7 +125,7 @@
 			
 			function debugQuick(msg){
 				console.log(msg);
-				alert(msg);
+				//alert(msg);
 			}
 			
 			
@@ -187,6 +187,9 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
+					if(data.success){
+						setPanelLoggedOn(userName);
+					}
 					
 				  },
 				  error:function(error){
@@ -220,6 +223,12 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
+					if(data.success){
+						setPanelLoggedOn(userName);
+					}else{
+						alert("log in failed");
+						setPanelLoggedOff();
+					}
 					
 				  },
 				  error:function(error){
@@ -391,7 +400,11 @@
 				$("#divLoggedUser").hide();
 				$("#divLoggedUserName").empty();
 				$("#divRegisterUser").show();
+				$("#newUserText").val("");
+				$("#newUserPassWordText").val("");
 				$("#divLogIn").show();
+				$("#logUesrText").val("");
+				$("#logPassText").val("");
 			}
 			
 			/**
@@ -409,6 +422,31 @@
 				sendGetLoginInfo(callBack);
 			}
 			
+			/**
+			send request to log user off
+			**/
+			function sendLogOff(){
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+				}
+				
+				$.ajax({
+				  url:HOST + '/vocab/log-user-off',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					debugQuick(data);
+					setPanelLoggedOff();
+				  },
+				  error:function(error){
+					debugQuick(error.responseText);
+				  }
+				});
+			
+			}
+			
+			
 		
 			/**
 			set up liseterners 
@@ -424,6 +462,12 @@
 			$("#btnAddUser").click(
 				addNewUser
 			);
+			
+			$("#btnLogOff").click(
+				sendLogOff
+			);
+			
+			
 			
 			
 			
