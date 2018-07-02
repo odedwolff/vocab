@@ -149,8 +149,10 @@ def getLogOnStatus(request):
 	"""
 	log("entering registerUser()")
 	userId = request.session[KEY_SESSION_LOGGED_USER]
-	username = False
-	isLogged = "False"
+	#username = False
+	#isLogged = "False"
+	username = ""
+	isLogged = False
 	if userId is not None:
 		isLogged = True
 		username = User.objects.get(pk= userId).name

@@ -41,8 +41,14 @@
 			</select>
 		</div>
 		
+		<div  class="panel1">
+			get logged in user info test
+			<button id=btnLoggedInUserInfo>go</button>
+			
+		</div>
 		
-		<div>
+		
+		<div class="panel1">
 			<div id="newExpression">
 				new expression
 				<input type="text" id="newExpressionText" />
@@ -56,7 +62,7 @@
 		</div>
 		
 		
-		<div>
+		<div id=divRegisterUser class="panel1">
 			register user
 			<div id="newUser">
 				user name
@@ -67,7 +73,7 @@
 			<button id=btnAddUser>submit</button>
 		</div>
 		
-		<div>
+		<div id=divLogIn class="panel1">
 			log user on
 			<div id="newUser">
 				user name
@@ -78,12 +84,13 @@
 			<button id=btnLogOn>submit</button>
 		</div>
 		
-		
-		<div>
-			get logged in user info 
-			<button id=btnLoggedInUserInfo>go</button>
-			
+		<div id=divLoggedUser class="panel1" >
+			logged on User: <div  id=divLoggedUserName>
+			<button id=btnLogOff>log off</button>
 		</div>
+		
+		
+		
 		
 		
 		
@@ -100,6 +107,9 @@
 			todo - each language should probably have its own categries, a category should be a subset of a language (consider 
 			rename simply to "subsest" or simlirly )
 			**/
+			
+			
+			
 			
 			var loadedLists = {
 				languages: null, 
@@ -188,10 +198,7 @@
 			}
 			
 			
-			function setPanelLoggedOn(userName){
-				
 			
-			}
 			
 			
 			
@@ -303,9 +310,9 @@
 			
 			
 			/**
-			sends a requet for logged on user form current browser
+			sends a requet for logged on user info form current browser
 			**/
-			function sendGetLoginInfo(){
+			function sendGetLoginInfo(loggedOnInfoCallBack){
 				url = HOST + '/vocab/get-logon-status';
 				
 				var post_data = {
@@ -316,10 +323,12 @@
 				  url: url,
 				  type:'POST',
 				  data:post_data,
+				  /**
 				  success:function(data){
 					debugQuick(data);
 					
-				  },
+				  },**/
+				  success:loggedOnInfoCallBack,
 				  error:function(error){
 					debugQuick(error.responseText);
 				  }
@@ -363,6 +372,43 @@
 				});
 			}
 			
+			
+			/**
+			set panel to given logged user
+			**/
+			function setPanelLoggedOn(userName){
+				$("#divLoggedUser").show();
+				$("#divLoggedUserName").append(userName);
+				$("#divRegisterUser").hide();
+				$("#divLogIn").hide();
+			}
+			
+			/**
+			set panel to no logged user
+			**/
+			
+			function setPanelLoggedOff(){
+				$("#divLoggedUser").hide();
+				$("#divLoggedUserName").empty();
+				$("#divRegisterUser").show();
+				$("#divLogIn").show();
+			}
+			
+			/**
+				get logged on Info from server and update pannels according to result
+			**/
+			function obtainLogOnInfo (){
+				var callBack = function handleRsult(data){
+					debugQuick(data);
+					if(data.isLogged){
+						setPanelLoggedOn(data.username);
+					}else{
+						setPanelLoggedOff();
+					}
+				}
+				sendGetLoginInfo(callBack);
+			}
+			
 		
 			/**
 			set up liseterners 
@@ -402,9 +448,13 @@
 			
 			$("#submitExpression").click(submitExpression);
 			$("#submitExpressionWTrx").click(submitExpressionFull);
-			$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
+			//$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
+			$("#btnLoggedInUserInfo").click(obtainLogOnInfo);
 			$("#btnLogOn").click(sendLogOn);
 			
+			
+			//when page first opens, get the logged on info from server 
+			obtainLogOnInfo();
 			
 			
 		</script>
