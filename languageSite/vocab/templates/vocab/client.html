@@ -5,6 +5,9 @@
 	<head>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		
+		{% load static %}
+		<!-- script src="{% static "my_app/example.jpg" %}" alt="My image"/> -->
+		<link rel="stylesheet" href="{% static "vocab/style.css" %}"/>
 	</head>
 	<body>
 		<div id="add language">
@@ -181,6 +184,12 @@
 					debugQuick(error.responseText);
 				  }
 				});
+			
+			}
+			
+			
+			function setPanelLoggedOn(userName){
+				
 			
 			}
 			
