@@ -266,13 +266,24 @@ def saveTrxPair(languageId1, expression1, categories1, languageId2, expression2,
 	if loadedLanguage2 is None:
 		return False
 		
-	newExp1 = Expression()
-	newExp1.expression  = expression1
-	newExp1.language = loadedLanguage1
 	
-	newExp2 = Expression()
-	newExp2.expression  = expression2
-	newExp2.language = loadedLanguage2
+	qSet = Expression.objects.filter(expression=expression1, language=loadedLanguage1)
+	if qSet:
+		newExp1 = qSet[0]
+	else:
+		newExp1 = Expression()
+		newExp1.expression  = expression1
+		newExp1.language = loadedLanguage1
+	
+	qSet = Expression.objects.filter(expression=expression2, language=loadedLanguage2)
+	if qSet:
+		newExp2 = qSet[0]
+	else:
+		newExp2 = Expression()
+		newExp2.expression  = expression2
+		newExp2.language = loadedLanguage2
+	
+	#TODO- rid of double saving   
 	newExp2.save()
 	newExp1.save()
 	newExp1.translations.add(newExp2)
