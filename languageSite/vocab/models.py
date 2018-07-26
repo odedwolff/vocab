@@ -34,6 +34,7 @@ class Catagory(models.Model):
 class Expression(models.Model):
 	expression = models.CharField(max_length=1000, null=True)
 	language = models.ForeignKey(Language, on_delete=models.CASCADE)
+	frequency = models.FloatField()
 	#expression = models.ForeignKey(Expression, on_delete=models.CASCADE)
 	translations = models.ManyToManyField("self")
 	categories = models.ManyToManyField(Catagory)

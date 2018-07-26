@@ -246,7 +246,7 @@ def validateExpression(expression, languageId, categoriesIds):
 	
 
 	
-def saveTrxPair(languageId1, expression1, categories1, languageId2, expression2, categories2):
+def saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expression2, freq2, categories2):
 	"""
 	saves to database new expressions translation pair 
 	
@@ -274,6 +274,7 @@ def saveTrxPair(languageId1, expression1, categories1, languageId2, expression2,
 		newExp1 = Expression()
 		newExp1.expression  = expression1
 		newExp1.language = loadedLanguage1
+		newExp1.frequency = freq1
 	
 	qSet = Expression.objects.filter(expression=expression2, language=loadedLanguage2)
 	if qSet:
@@ -282,6 +283,7 @@ def saveTrxPair(languageId1, expression1, categories1, languageId2, expression2,
 		newExp2 = Expression()
 		newExp2.expression  = expression2
 		newExp2.language = loadedLanguage2
+		newExp2.frequency = freq2
 	
 	#TODO- rid of double saving   
 	newExp2.save()
