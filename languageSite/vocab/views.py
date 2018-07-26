@@ -293,6 +293,10 @@ def saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expre
 	newExp1.save()
 	return True 
 	
+def insertCategory(categroyName):
+	cat = Category()
+	
+	
 
 def hashPass(password):
 	return pbkdf2_sha256.hash(password)
