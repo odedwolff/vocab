@@ -298,6 +298,23 @@ def insertCategory(categroyName):
 	cat.category = categroyName
 	cat.save()
 	
+def compareCategories(list1, list2):
+	"""
+	compares content of 2 lists of integers representing Sets, order is not important 
+	"""
+	if not list1 and not list2:
+		return True
+	if (list1 and not list2) or (list2 and not list1):
+		return False
+	
+	list1.sort()
+	list2.sort()
+	if len(list1) != len(list2):
+		return False
+	for (elm1,elm2) in zip(list1, list2):
+		if elm1 != elm2:
+			return False
+	return True
 
 def hashPass(password):
 	return pbkdf2_sha256.hash(password)

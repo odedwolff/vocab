@@ -6,5 +6,11 @@ def run():
 	
 	#saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expression2, freq2, categories2)
 	
-	insertCategory("cat1")
+	#insertCategory("cat1")
 	
+	catList1 = [1, 35, 4]
+	catList2 = [4, 16, 2]
+	catList11 = [4, 1, 35]
+	
+	print (compareCategories(catList1, catList2))
+	print (compareCategories(catList1, catList11))
