@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from django.http import JsonResponse
 
-from .models import Expression, Language, User
+from .models import Expression, Language, User, Catagory
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -294,8 +294,9 @@ def saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expre
 	return True 
 	
 def insertCategory(categroyName):
-	cat = Category()
-	
+	cat = Catagory()
+	cat.category = categroyName
+	cat.save()
 	
 
 def hashPass(password):
