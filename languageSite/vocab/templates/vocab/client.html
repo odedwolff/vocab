@@ -508,6 +508,33 @@
 			}
 			
 			
+			function loadCategories(){
+				/**
+				loads all categories from server
+				**/
+				
+				
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}"
+				}
+				
+				$.ajax({
+				  url: HOST + '/vocab/load-cats',
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					debugQuick(data);
+				  },
+				  error:function(error){
+					debugQuick(error.responseText);
+				  }
+				});
+			}
+			
+			
+			
+			
 		
 			/**
 			set up liseterners 

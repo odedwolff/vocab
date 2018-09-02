@@ -319,10 +319,19 @@ def loadCategoriesFromDB():
 	"""
 	loads all categories from database
 	"""
-	loadedLang = Catagory.objects.all()
-	return loadedLang
+	loadedCats = Catagory.objects.all()
+	catList = []
+	#convert to an array of strings, so it can be serielized by Json handler
+	for cat in loadedCats:
+		tmpElm = {}
+		tmpElm["cat"] = cat.category
+		tmpElm["id"] = cat.id
+		catList.append(tmpElm)
+	result = {"loadedCats": catList}
+		
+	return result
 	
-def handleLoadCategoriesReq():
+def handleReqLoadCategories(request):
 	"""
 	handles a request to load all categories by loading all categories and sending them back in reply 
 	"""

@@ -13,5 +13,7 @@ urlpatterns = [
 	path('get-logon-status', views.getLogOnStatus, name='getLogonStatus'),
 	path('log-user-on', views.logUserOn, name='logUserOn'), 
 	path('log-user-off', views.logUserOff, name='logUserOff'),
-	path('add-cat', views.handleReqAddCat, name='addCat')
+	path('add-cat', views.handleReqAddCat, name='addCat'),
+	path('load-cats', views.handleReqLoadCategories, name='loadCats')
+	
 ]
