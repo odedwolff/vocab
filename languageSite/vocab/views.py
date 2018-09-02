@@ -167,13 +167,6 @@ def getLogOnStatus(request):
 	result = {"isLogged":isLogged,"username": username }
 	return JsonResponse(result, safe=False)
 		
-
-
-		
-		
-		
-		
-
 		
 def loadLanguages (request):
 	"""
@@ -293,6 +286,12 @@ def saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expre
 	newExp1.save()
 	return True 
 	
+
+def handleReqAddCat(request):
+	newCat = request.POST["cat"]
+	insertCategory(newCat)
+	return HttpResponse("new category saved")
+	
 def insertCategory(categroyName):
 	cat = Catagory()
 	cat.category = categroyName
@@ -315,6 +314,21 @@ def compareCategories(list1, list2):
 		if elm1 != elm2:
 			return False
 	return True
+	
+def loadCategoriesFromDB():
+	"""
+	loads all categories from database
+	"""
+	loadedLang = Catagory.objects.all()
+	return loadedLang
+	
+def handleLoadCategoriesReq():
+	"""
+	handles a request to load all categories by loading all categories and sending them back in reply 
+	"""
+	loadedList = loadCategoriesFromDB()
+	return JsonResponse(loadedList, safe=False)
+	
 
 def hashPass(password):
 	return pbkdf2_sha256.hash(password)

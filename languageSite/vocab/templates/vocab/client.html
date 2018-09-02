@@ -10,36 +10,62 @@
 		<link rel="stylesheet" href="{% static "vocab/style.css" %}"/>
 	</head>
 	<body>
-		<div id="add language">
-			add language: 
-			<input type="text" id="languageInput" />
-			<button id="submitLanguage">submit
-			
-			</button>
-		</div>
-		
-		<div id="load languages">
-			load Languages
-			
-			<button id="loadLangButton">submit
-			
-			</button>
-		</div>
-			
-		<div id="languagesList">
-			language source 
-			<select name="languages" id="langList">
+	
+		<div class="panel1">
+			<div id="add language">
+				add language: 
+				<input type="text" id="languageInput" />
+				<button id="submitLanguage">submit
 				
-			</select>
-		</div>
-		
-		
-		<div id="languagesListTarget">
-			language target 
-			<select name="languagesTarget" id="langListTarget">
+				</button>
+			</div>
+			
+			<div id="load languages">
+				load Languages
 				
-			</select>
+				<button id="loadLangButton">submit
+				
+				</button>
+			</div>
+				
+			<div id="languagesList">
+				language source 
+				<select name="languages" id="langList">
+					
+				</select>
+			</div>
+			
+			
+			<div id="languagesListTarget">
+				language target 
+				<select name="languagesTarget" id="langListTarget">
+					
+				</select>
+			</div>
 		</div>
+		
+		
+		<div class="panel1">
+			<div id="add categories">
+				add category: 
+				<input type="text" id="textInputcategories" />
+				<button id="submitInsertCategory">submit
+				
+				</button>
+			</div>
+			
+			<div id="load categories">
+				load categories
+				
+				<button id="btnLoadCategories">submit
+				
+				</button>
+			</div>
+				
+		</div>
+		
+		
+		
 		
 		<div  class="panel1">
 			get logged in user info test
@@ -447,6 +473,40 @@
 			
 			}
 			
+			/**
+			sensds request to server insert a new category 
+			**/
+			function insertCategory(){
+				newCat = $("#textInputcategories").val();
+				//validate new category input
+				if(!newCat || newCat===""){
+					debugQuick("empty or null category value");
+					return;
+				}
+				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'cat': newCat
+				}
+				
+				$.ajax({
+				  url: HOST + '/vocab/add-cat',
+				  
+				  type:'POST',
+				  data:post_data,
+				  success:function(data){
+					//console.log(data);
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(error.responseText);
+				  }
+				});
+			
+			}
+			
 			
 		
 			/**
@@ -466,6 +526,15 @@
 			
 			$("#btnLogOff").click(
 				sendLogOff
+			);
+			
+			
+			$("#submitInsertCategory").click(
+				insertCategory
+			);
+			
+			$("#btnLoadCategories").click(
+				loadCategories
 			);
 			
 			

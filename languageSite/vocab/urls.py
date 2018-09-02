@@ -12,5 +12,6 @@ urlpatterns = [
 	path('register-user', views.registerUser, name='registerUser'), 
 	path('get-logon-status', views.getLogOnStatus, name='getLogonStatus'),
 	path('log-user-on', views.logUserOn, name='logUserOn'), 
-	path('log-user-off', views.logUserOff, name='logUserOff')
+	path('log-user-off', views.logUserOff, name='logUserOff'),
+	path('add-cat', views.handleReqAddCat, name='addCat')
 ]
