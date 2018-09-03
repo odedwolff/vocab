@@ -78,10 +78,24 @@
 			<div id="newExpression">
 				new expression
 				<input type="text" id="newExpressionText" />
+				<div>
+					<fieldset id="fieldSetSrcCats">  
+						<legend>categories</legend>  
+						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
+						<br>  
+					</fieldset> 
+				</div>
 			</div>
 			<div id="newExpressionTarget">
 				new expression target
 				<input type="text" id="newExpressionTargetText" />
+				<div>
+					<fieldset id="fieldSetTrgCats">  
+						<legend>categories</legend>  
+						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
+						<br>  
+					</fieldset> 
+				</div>
 			</div>
 			<button id=submitExpression>submit single</button>
 			<button id=submitExpressionWTrx>submit full</button>
@@ -116,19 +130,15 @@
 		</div>
 		
 		
-		
-		
-		
-		
-		
-		
 			
 		
 		<script>
 			
+			
 			//TODO- get this info from configuration on runtime 
 			var HOST = "http://localhost:8000";
-			
+			var INPUT_GRP_SRC_EXP = "inputGroupSrcExp";
+			var INPUT_GRP_TRG_EXP = "inputGroupTrgExp";
 			/**
 			todo - each language should probably have its own categries, a category should be a subset of a language (consider 
 			rename simply to "subsest" or simlirly )
@@ -525,6 +535,7 @@
 				  data:post_data,
 				  success:function(data){
 					debugQuick(data);
+					handleLoadedCats(data);
 				  },
 				  error:function(error){
 					debugQuick(error.responseText);
@@ -533,7 +544,48 @@
 			}
 			
 			
+			function handleLoadedCats(catsData)
+			{
+				populateCats(catsData, $("#fieldSetSrcCats"), INPUT_GRP_SRC_EXP);
+				populateCats(catsData, $("#fieldSetTrgCats"), INPUT_GRP_TRG_EXP);
+			}
 			
+			function populateCats(catsData, domElmContainer, groupName){
+			//id = newExpressionText
+			//<input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> 
+				var catStr, catId, newDomElmStr
+				catsList = catsData.loadedCats;
+				for(var i = 0; i < catsList.length; i++)
+				{
+					catStr= catsList[i]["cat"];
+					catId= catsList[i]["id"];
+					newDomElmStr = 
+					"<input type='checkbox' name= '" + groupName + "' value= '" + catId +  "'>" + catStr + "<br>"
+					$(domElmContainer).append(newDomElmStr)
+				}
+			}
+			
+			function listSelectedCats(catsGroupName){
+				var checkboxes = document.getElementsByName(INPUT_GRP_SRC_EXP);  
+				var listOut = [];
+				var val;
+				for(var i = 0; i < checkboxes.length; i++)  
+				{  
+					if(checkboxes[i].checked)
+					{
+						val = checkboxes[i].value;  
+						console.log("checked cat:" + val);
+						listOut.push(val);
+					}		
+				} 
+				return listOut;
+			}
+			
+			
+			function clickTest1(){
+				listSelectedCats("fieldSetSrcCats");
+			
+			}
 			
 		
 			/**
@@ -562,6 +614,10 @@
 			
 			$("#btnLoadCategories").click(
 				loadCategories
+			);
+			
+			$("#btnTest1").click(
+				clickTest1
 			);
 			
 			
