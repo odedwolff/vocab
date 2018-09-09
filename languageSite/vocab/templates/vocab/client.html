@@ -79,6 +79,9 @@
 				new expression
 				<input type="text" id="newExpressionText" />
 				<div>
+					<button id="btnVisibilityCatsSrc">+-</button>
+				</div>
+				<div id=divSrcCats>
 					<fieldset id="fieldSetSrcCats">  
 						<legend>categories</legend>  
 						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
@@ -90,6 +93,9 @@
 				new expression target
 				<input type="text" id="newExpressionTargetText" />
 				<div>
+					<button id="btnVisibilityCatsTrg">+-</button>
+				</div>
+				<div id=divTrgCats>
 					<fieldset id="fieldSetTrgCats">  
 						<legend>categories</legend>  
 						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
@@ -147,6 +153,9 @@
 			
 			
 			
+			
+			
+			
 			var loadedLists = {
 				languages: null, 
 				categories: null
@@ -163,6 +172,27 @@
 				console.log()
 				console.log("--DEBUG--" + msg);
 				//alert(msg);
+			}
+			
+			
+			//true inidicated visible and vice verca 
+			var visStatus = {
+				srcCats:true, 
+				trgCats:true
+			}
+			
+			function toggleVis(elmId, statusHandle){
+				if(visStatus[statusHandle])
+				{
+					$("#" + elmId).hide();
+					visStatus[statusHandle] = false;
+					
+				}
+				else
+				{
+					$("#" + elmId).show();
+					visStatus[statusHandle] = true;
+				}
 			}
 			
 			
@@ -619,6 +649,27 @@
 			$("#btnTest1").click(
 				clickTest1
 			);
+			
+			$("#btnVisibilityCatsSrc").click(
+				function()
+				{
+					toggleVis("divSrcCats", "srcCats");
+				}
+			);
+			
+			$("#btnVisibilityCatsTrg").click(
+				function()
+				{
+					toggleVis("divTrgCats", "trgCats");
+				}
+			);
+			
+			
+			
+			
+			
+			
+			
 			
 			
 			
