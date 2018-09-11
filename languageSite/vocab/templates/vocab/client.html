@@ -78,6 +78,9 @@
 			<div id="newExpression">
 				new expression
 				<input type="text" id="newExpressionText" />
+				<label for="inSrcWeight">weight(min 0.0, max 1.0)</label>
+				<input type="number" id="inSrcWeight" name="inSrcWeight"
+					min="0" max="1" step="0.05" value="0.5"/>
 				<div>
 					<button id="btnVisibilityCatsSrc">+-</button>
 				</div>
@@ -92,6 +95,9 @@
 			<div id="newExpressionTarget">
 				new expression target
 				<input type="text" id="newExpressionTargetText" />
+				<label for="inTrgWeight">weight(min 0.0, max 1.0)</label>
+				<input type="number" id="inTrgWeight" name="inTrgWeight"
+					min="0" max="1" step="0.05" value="0.5"/>
 				<div>
 					<button id="btnVisibilityCatsTrg">+-</button>
 				</div>
@@ -425,12 +431,17 @@
 					debugQuick("please make sure that epxresson is not empty and langaue is selected for both source and target");
 					return;
 				}
+				var weight1=document.getElementById("inSrcWeight").value;
+				var weight2=document.getElementById("inTrgWeight").value;
+				
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
 					'expression1': newExpreesion, 
-					'languageID1' : currentSelections.language, 
+					'languageID1' : currentSelections.language,
+					'weight1' : weight1, 	
 					'expression2': newExpressionTarget, 
-					'languageID2' : currentSelections.languageTarget
+					'languageID2' : currentSelections.languageTarget,
+					'weight2' : weight2
 				}
 				$.ajax({
 				  url:HOST + '/vocab/add-expressions-full',

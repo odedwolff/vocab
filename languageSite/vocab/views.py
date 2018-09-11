@@ -77,9 +77,13 @@ def addExpressionFull(request):
 	"""	
 	languageId = request.POST["languageID1"]
 	expression = request.POST["expression1"]
+	frq1=request.POST["weight1"]
 	languageId2 = request.POST["languageID2"]
 	expression2 = request.POST["expression2"]
-	saved = saveTrxPair(languageId, expression, None, languageId2, expression2, None)
+	frq2=request.POST["weight2"]
+	#saved = saveTrxPair(languageId, expression, None, languageId2, expression2, None)
+	saved = saveTrxPair(languageId, expression, frq1, None, languageId2, expression2, frq2, None)
+	
 	if saved:
 		return HttpResponse("expressions pair saved")	
 	else:
