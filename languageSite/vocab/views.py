@@ -287,6 +287,10 @@ def saveTrxPair(exp1, exp2, catsType):
 	*implment hadling of categories lists for both new expressions 
 	"""
 	
+	log("entering saveTrxPair(exp1, exp2....)")
+	log("exp1= " + str(exp1))
+	log("exp2= " + str(exp2))
+	
 	if not validateExpression(exp1[KEY_EXP_STR], exp1[KEY_LANG], exp1[KEY_FREQ]) or not validateExpression(exp2[KEY_EXP_STR], exp2[KEY_LANG], exp2[KEY_FREQ]):
 		log("validation of new Expressions failed, aborting save")
 		return False
@@ -310,10 +314,15 @@ def saveTrxPair(exp1, exp2, catsType):
 	#check whether expression already exists, requires match of language, expresson and categories (that is,
 	#having the exact same set of categories)
 	match= False
+	
 	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=loadedLanguage1)
 	#qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language__id=exp1[KEY_LANG])
 	
+	log("ran query on DB looking for expression " + exp1[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
+	log("number of matchint reults: " + str(len(qSet)))
 	log("iterating loaded expressions")
+	
+	
 	if qSet:
 		#newExp1 = qSet[0]
 		for loadedExp in qSet:
@@ -322,7 +331,7 @@ def saveTrxPair(exp1, exp2, catsType):
 				#loadedCats = extractCatIds(loadedExp.categories)
 				loadedCats = extractCatIds(loadedExp.categories.all())
 			else:
-				loadedCats = extractCatStrings(loadedExp.categories)
+				loadedCats = extractCatStrings(loadedExp.categories.all())
 		
 			if	compareCategories(exp1[KEY_CATS_IDS], loadedCats):
 				newExp1= loadedExp
@@ -342,14 +351,21 @@ def saveTrxPair(exp1, exp2, catsType):
 	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=loadedLanguage2)
 	#qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language__id=exp2[KEY_LANG])
 	
+	
+	
+	log("ran query on DB looking for expression " + exp2[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
+	log("number of matchint reults: " + str(len(qSet)))
+	log("iterating loaded expressions")
+	
+	
 	if qSet:
 		#newExp1 = qSet[0]
 		for loadedExp in qSet:	
 			if(catsType is CATS_TYPE_INTS):
-				loadedCats = extractCatIds(loadedExp.categories)
+				loadedCats = extractCatIds(loadedExp.categories.all())
 			else:
-				loadedCats = extractCatStrings(loadedExp.categories)
-			if	compareCategories(exp2[KEY_CATS_IDS], loadedExp.categories):
+				loadedCats = extractCatStrings(loadedExp.categories.all())
+			if	compareCategories(exp2[KEY_CATS_IDS], loadedCats):
 				newExp2= loadedExp
 				match= True
 				log("matched existing epxression2")
@@ -359,7 +375,7 @@ def saveTrxPair(exp1, exp2, catsType):
 		log("did not match existing epxression2, creating a new instance")
 		newExp2 = Expression()
 		newExp2.expression  = exp2[KEY_EXP_STR]
-		newExp2.language = loadedLanguage1
+		newExp2.language = loadedLanguage2
 		newExp2.frequency = exp2[KEY_FREQ]
 	
 	
