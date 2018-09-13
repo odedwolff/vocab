@@ -433,15 +433,19 @@
 				}
 				var weight1=document.getElementById("inSrcWeight").value;
 				var weight2=document.getElementById("inTrgWeight").value;
+				var cats1 = listSelectedCats("inputGroupSrcExp");
+				var cats2 = listSelectedCats("inputGroupTrgExp");
 				
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
 					'expression1': newExpreesion, 
 					'languageID1' : currentSelections.language,
-					'weight1' : weight1, 	
+					'weight1' : weight1, 
+					'cats1' : cats1, 
 					'expression2': newExpressionTarget, 
 					'languageID2' : currentSelections.languageTarget,
-					'weight2' : weight2
+					'weight2' : weight2,
+					'cats2' : cats2
 				}
 				$.ajax({
 				  url:HOST + '/vocab/add-expressions-full',
@@ -607,7 +611,7 @@
 			}
 			
 			function listSelectedCats(catsGroupName){
-				var checkboxes = document.getElementsByName(INPUT_GRP_SRC_EXP);  
+				var checkboxes = document.getElementsByName(catsGroupName);  
 				var listOut = [];
 				var val;
 				for(var i = 0; i < checkboxes.length; i++)  

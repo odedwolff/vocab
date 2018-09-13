@@ -22,6 +22,14 @@ import json
 KEY_SESSION_LOGGED_USER = "loggedUser"
 ERROR_CODE_NO_SUCH_USER = 5001
 ERROR_CODE_PASSWORD_DONT_MATCH = 5002
+KEY_LANG = "language"
+KEY_EXP_STR = "expressionStr"
+KEY_FREQ = "frequency"
+KEY_LANGUAGE = "language"
+KEY_CATS_IDS = "catIds"
+KEY_CATS_STRS = "catStrs"
+CATS_TYPE_STRINGS = "compareStrings"
+CATS_TYPE_INTS = "compareInts"
 
 
 def log(msg, imortance = 0):
@@ -75,14 +83,20 @@ def addExpressionFull(request):
 	*renmae to better represent this adds a translation rather than an expression 
 	*add details to failure message 
 	"""	
-	languageId = request.POST["languageID1"]
-	expression = request.POST["expression1"]
-	frq1=request.POST["weight1"]
-	languageId2 = request.POST["languageID2"]
-	expression2 = request.POST["expression2"]
-	frq2=request.POST["weight2"]
-	#saved = saveTrxPair(languageId, expression, None, languageId2, expression2, None)
-	saved = saveTrxPair(languageId, expression, frq1, None, languageId2, expression2, frq2, None)
+	exp1 = {}
+	exp1[KEY_LANG] = request.POST["languageID1"]
+	exp1[KEY_EXP_STR] = request.POST["expression1"]
+	exp1[KEY_FREQ]=request.POST["weight1"]
+	exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]")
+	exp2 = {}
+	exp2[KEY_LANG] = request.POST["languageID2"]
+	exp2[KEY_EXP_STR] = request.POST["expression2"]
+	exp2[KEY_FREQ]=request.POST["weight2"]
+	exp2[KEY_CATS_IDS]= request.POST.getlist("cats2[]")
+	
+	#saved = saveTrxPair(languageId, expression, frq1, cats1, languageId2, expression2, frq2, cats2)
+	
+	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS)
 	
 	if saved:
 		return HttpResponse("expressions pair saved")	
@@ -237,13 +251,35 @@ def saveExpression (expression, languageId, categoriesIds):
 	return True 
 	
 
-def validateExpression(expression, languageId, categoriesIds):
-	return expression is not None and languageId is not None 
+def validateExpression(expression, languageId, freq):
+	return expression is not None and languageId is not None and freq is not None
 	
 	
 
 	
-def saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expression2, freq2, categories2):
+#def saveTrxPair(languageId1, expression1, freq1, cats1, languageId2, expression2, freq2, cats2):
+
+
+def extractCatIds (cats):
+	log("entering extractCatIds, arg cats=" + str(cats))
+	theResult = []
+	if not cats or len(cats) is 0:
+		return theResult
+	for cat in cats:
+		theResult.append(cat.id)
+	return theResult
+
+def extractCatStrings  (cats):
+	log("entering extractCatStrings, arg cats=" + str(cats))
+	theResult = []
+	if not cats or len(cats) is 0:
+		return theResult
+	for cat in cats:
+		theResult.append(cat.category)
+	return theResult
+
+def saveTrxPair(exp1, exp2, catsType):
+
 	"""
 	saves to database new expressions translation pair 
 	
@@ -251,36 +287,81 @@ def saveTrxPair(languageId1, expression1, freq1, categories1, languageId2, expre
 	*implment hadling of categories lists for both new expressions 
 	"""
 	
-	if not validateExpression(expression1, languageId1, categories1) or not validateExpression(expression2, languageId2, categories2):
+	if not validateExpression(exp1[KEY_EXP_STR], exp1[KEY_LANG], exp1[KEY_FREQ]) or not validateExpression(exp2[KEY_EXP_STR], exp2[KEY_LANG], exp2[KEY_FREQ]):
+		log("validation of new Expressions failed, aborting save")
+		return False
+	
+	if not (catsType is CATS_TYPE_INTS or catsType is CATS_TYPE_INTS):
+		log("invalid cats typs " + catsType)
 		return False
 	
 	#load languages
-	loadedLanguage1 = Language.objects.get(id=languageId1)
+	
+	loadedLanguage1 = Language.objects.get(id=exp1[KEY_LANG])
 	if loadedLanguage1 is None:
+		log("could not load language with id " + exp1[KEY_LANG])
 		return False
 	
-	loadedLanguage2 = Language.objects.get(id=languageId2)
+	loadedLanguage2 = Language.objects.get(id=exp2[KEY_LANG])
 	if loadedLanguage2 is None:
+		log("could not load language with id " + exp2[KEY_LANG])
 		return False
+	
+	#check whether expression already exists, requires match of language, expresson and categories (that is,
+	#having the exact same set of categories)
+	match= False
+	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=loadedLanguage1)
+	#qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language__id=exp1[KEY_LANG])
+	
+	log("iterating loaded expressions")
+	if qSet:
+		#newExp1 = qSet[0]
+		for loadedExp in qSet:
+			log("loaded Expression: " + str(loadedExp))
+			if(catsType is CATS_TYPE_INTS):
+				#loadedCats = extractCatIds(loadedExp.categories)
+				loadedCats = extractCatIds(loadedExp.categories.all())
+			else:
+				loadedCats = extractCatStrings(loadedExp.categories)
 		
-	
-	qSet = Expression.objects.filter(expression=expression1, language=loadedLanguage1)
-	if qSet:
-		newExp1 = qSet[0]
-	else:
+			if	compareCategories(exp1[KEY_CATS_IDS], loadedCats):
+				newExp1= loadedExp
+				match= True
+				log("matched existing epxression1")
+				break 
+
+	#else:
+	if not match:
+		log("did not match existing epxression1, creating a new instance")
 		newExp1 = Expression()
-		newExp1.expression  = expression1
+		newExp1.expression  = exp1[KEY_EXP_STR]
 		newExp1.language = loadedLanguage1
-		newExp1.frequency = freq1
+		newExp1.frequency = exp1[KEY_FREQ]
+		
+	match= False
+	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=loadedLanguage2)
+	#qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language__id=exp2[KEY_LANG])
 	
-	qSet = Expression.objects.filter(expression=expression2, language=loadedLanguage2)
 	if qSet:
-		newExp2 = qSet[0]
-	else:
+		#newExp1 = qSet[0]
+		for loadedExp in qSet:	
+			if(catsType is CATS_TYPE_INTS):
+				loadedCats = extractCatIds(loadedExp.categories)
+			else:
+				loadedCats = extractCatStrings(loadedExp.categories)
+			if	compareCategories(exp2[KEY_CATS_IDS], loadedExp.categories):
+				newExp2= loadedExp
+				match= True
+				log("matched existing epxression2")
+				
+	#else:
+	if not match:
+		log("did not match existing epxression2, creating a new instance")
 		newExp2 = Expression()
-		newExp2.expression  = expression2
-		newExp2.language = loadedLanguage2
-		newExp2.frequency = freq2
+		newExp2.expression  = exp2[KEY_EXP_STR]
+		newExp2.language = loadedLanguage1
+		newExp2.frequency = exp2[KEY_FREQ]
+	
 	
 	#TODO- rid of double saving   
 	newExp2.save()
@@ -303,7 +384,7 @@ def insertCategory(categroyName):
 	
 def compareCategories(list1, list2):
 	"""
-	compares content of 2 lists of integers representing Sets, order is not important 
+	compares content of 2 lists of integers or strings representing Sets, order is not important 
 	"""
 	if not list1 and not list2:
 		return True
@@ -316,6 +397,7 @@ def compareCategories(list1, list2):
 		return False
 	for (elm1,elm2) in zip(list1, list2):
 		if elm1 != elm2:
+		#if elm1.id != elm2.id:
 			return False
 	return True
 	
