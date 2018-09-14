@@ -266,7 +266,8 @@ def extractCatIds (cats):
 	if not cats or len(cats) is 0:
 		return theResult
 	for cat in cats:
-		theResult.append(cat.id)
+		#theResult.append(cat.id)
+		theResult.append(str(cat.id))
 	return theResult
 
 def extractCatStrings  (cats):
@@ -318,15 +319,17 @@ def saveTrxPair(exp1, exp2, catsType):
 	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=loadedLanguage1)
 	#qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language__id=exp1[KEY_LANG])
 	
-	log("ran query on DB looking for expression " + exp1[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
-	log("number of matchint reults: " + str(len(qSet)))
-	log("iterating loaded expressions")
+	#log("ran query on DB looking for expression " + exp1[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
+	#log("number of matchint reults: " + str(len(qSet)))
+	#log("iterating loaded expressions")
 	
 	
 	if qSet:
 		#newExp1 = qSet[0]
 		for loadedExp in qSet:
-			log("loaded Expression: " + str(loadedExp))
+			#log("checking match for loaded expression " + str(loadedExp))
+			loadedExpCats= loadedExp.categories.all()
+			#log("loaded exp cats=" + str(loadedExpCats))
 			if(catsType is CATS_TYPE_INTS):
 				#loadedCats = extractCatIds(loadedExp.categories)
 				loadedCats = extractCatIds(loadedExp.categories.all())
@@ -346,6 +349,9 @@ def saveTrxPair(exp1, exp2, catsType):
 		newExp1.expression  = exp1[KEY_EXP_STR]
 		newExp1.language = loadedLanguage1
 		newExp1.frequency = exp1[KEY_FREQ]
+		newExp1.save()
+		catsToSave = Catagory.objects.filter(id__in=exp1[KEY_CATS_IDS])
+		newExp1.categories.add(*catsToSave.all())
 		
 	match= False
 	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=loadedLanguage2)
@@ -353,16 +359,19 @@ def saveTrxPair(exp1, exp2, catsType):
 	
 	
 	
-	log("ran query on DB looking for expression " + exp2[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
-	log("number of matchint reults: " + str(len(qSet)))
-	log("iterating loaded expressions")
+	#log("ran query on DB looking for expression " + exp2[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
+	#log("number of matchint reults: " + str(len(qSet)))
+	#log("iterating loaded expressions")
 	
 	
 	if qSet:
 		#newExp1 = qSet[0]
 		for loadedExp in qSet:	
+			#log("checking match for loaded expression " + str(loadedExp))
+			loadedExpCats= loadedExp.categories.all()
+			#log("loaded exp cats=" + str(loadedExpCats))
 			if(catsType is CATS_TYPE_INTS):
-				loadedCats = extractCatIds(loadedExp.categories.all())
+				loadedCats = extractCatIds(loadedExpCats)
 			else:
 				loadedCats = extractCatStrings(loadedExp.categories.all())
 			if	compareCategories(exp2[KEY_CATS_IDS], loadedCats):
@@ -377,6 +386,9 @@ def saveTrxPair(exp1, exp2, catsType):
 		newExp2.expression  = exp2[KEY_EXP_STR]
 		newExp2.language = loadedLanguage2
 		newExp2.frequency = exp2[KEY_FREQ]
+		newExp2.save()
+		catsToSave = Catagory.objects.filter(id__in=exp2[KEY_CATS_IDS])
+		newExp2.categories.add(*catsToSave.all())
 	
 	
 	#TODO- rid of double saving   
@@ -402,6 +414,10 @@ def compareCategories(list1, list2):
 	"""
 	compares content of 2 lists of integers or strings representing Sets, order is not important 
 	"""
+	log("entering compareCategories(list1, list2)")
+	log("list1=" + str(list1))
+	log("list2=" + str(list2))
+
 	if not list1 and not list2:
 		return True
 	if (list1 and not list2) or (list2 and not list1):
