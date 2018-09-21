@@ -173,7 +173,9 @@ def getLogOnStatus(request):
 	seponds over http regarding login status of sending browser
 	"""
 	log("entering registerUser()")
-	userId = request.session[KEY_SESSION_LOGGED_USER]
+	userId = None 
+	if KEY_SESSION_LOGGED_USER in request.session:
+		userId = request.session[KEY_SESSION_LOGGED_USER]
 	#username = False
 	#isLogged = "False"
 	username = ""
