@@ -141,6 +141,11 @@
 			<button id=btnLogOff>log off</button>
 		</div>
 		
+		<div id=divFileBrowser class="panel1" >
+			<input type="file" style="display: none" id="inFile" />
+			<button id=btnBrowsFiles>Open File Dialog</button>	
+		</div>
+		
 		
 			
 		
@@ -677,6 +682,18 @@
 				{
 					toggleVis("divTrgCats", "trgCats");
 				}
+			);
+			
+			
+			$("#btnBrowsFiles").on("click", function() {
+                $("input").trigger("click");
+            });
+			
+			$("#inFile").change(function()
+			{
+				var fileName = $(this).val();
+				alert(fileName)
+			}
 			);
 			
 			
