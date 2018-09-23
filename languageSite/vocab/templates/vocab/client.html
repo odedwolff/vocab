@@ -637,6 +637,29 @@
 			
 			}
 			
+			
+			function readSingleFile(e)
+			{
+				var file = e.target.files[0];
+				if (!file) 
+				{
+					console.log("event target didnt contain valid file. e.target= " + e.target);
+					return;
+				}
+				var reader = new FileReader();
+				reader.onload = function(e) 
+					{
+						var contents = e.target.result;
+						handFileContents(contents);
+					};
+				reader.readAsText(file);
+			}
+			
+			function handFileContents(contents){
+				
+			}
+
+			
 		
 			/**
 			set up liseterners 
@@ -689,10 +712,12 @@
                 $("input").trigger("click");
             });
 			
-			$("#inFile").change(function()
+			$("#inFile").change(function(e)
 			{
 				var fileName = $(this).val();
-				alert(fileName)
+				//alert(fileName)
+				//alert(e.target);
+				readSingleFile(e);
 			}
 			);
 			
