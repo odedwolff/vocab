@@ -394,7 +394,7 @@
 				});
 			
 			}
-			
+			 
 			
 			/**
 			sends a requet for logged on user info form current browser
@@ -655,8 +655,34 @@
 				reader.readAsText(file);
 			}
 			
+			
 			function handFileContents(contents){
+				var dataUpLoad = JSON.parse(contents);
+				uploadTranslatioinsBatch(dataUpLoad);
+			}
+			
+			function uploadTranslatioinsBatch(uploadDataObj){
+				url = HOST + '/vocab/uploadTranslationsBatch';
 				
+				var post_data = {
+					'csrfmiddlewaretoken':"{{ csrf_token }}"
+				}
+				
+				$.ajax({
+				  url: url,
+				  type:'POST',
+				  data:uploadDataObj,
+				  /**
+				  success:function(data){
+					debugQuick(data);
+					
+				  },**/
+				  success:function()
+					{(console.log("uploadDataObj succeed"))},
+				  error:function(error){
+					debugQuick(error.responseText);
+				  }
+				});
 			}
 
 			
