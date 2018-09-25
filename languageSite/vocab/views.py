@@ -371,7 +371,11 @@ def saveTrxPair(exp1, exp2, catsType):
 			else:
 				loadedCats = extractCatStrings(loadedExp.categories.all())
 		
-			if	compareCategories(exp1[KEY_CATS_IDS], loadedCats):
+			if KEY_CATS_IDS in exp1:
+				exp1CatIds = exp1[KEY_CATS_IDS]
+			else:
+				exp1CatIds = []
+			if	compareCategories(exp1CatIds, loadedCats):
 				newExp1= loadedExp
 				match= True
 				log("matched existing epxression1")
@@ -410,7 +414,12 @@ def saveTrxPair(exp1, exp2, catsType):
 				loadedCats = extractCatIds(loadedExpCats)
 			else:
 				loadedCats = extractCatStrings(loadedExp.categories.all())
-			if	compareCategories(exp2[KEY_CATS_IDS], loadedCats):
+			
+			if KEY_CATS_IDS in exp2:
+				exp1CatIds = exp2[KEY_CATS_IDS]
+			else:
+				exp1CatIds = []
+			if	compareCategories(exp1CatIds, loadedCats):
 				newExp2= loadedExp
 				match= True
 				log("matched existing epxression2")
