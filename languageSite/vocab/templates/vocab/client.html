@@ -779,11 +779,13 @@
             });
 			
 			$("#inFile").change(function(e)
+			//$("#inFile").select(function(e)
 			{
 				var fileName = $(this).val();
 				//alert(fileName)
 				//alert(e.target);
 				readSingleFile(e);
+				$(this).val("");
 			}
 			);
 			
