@@ -14,6 +14,8 @@ urlpatterns = [
 	path('log-user-on', views.logUserOn, name='logUserOn'), 
 	path('log-user-off', views.logUserOff, name='logUserOff'),
 	path('add-cat', views.handleReqAddCat, name='addCat'),
-	path('load-cats', views.handleReqLoadCategories, name='loadCats')
+	path('load-cats', views.handleReqLoadCategories, name='loadCats'),
+	path('upload-translations-batch', views.uploadTranslationsBatch, name='uploadTrxBatch'), 
+	path('test-read-objects', views.testReadObjects, name='testReadObjects')
 	
 ]

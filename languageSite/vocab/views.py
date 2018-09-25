@@ -16,6 +16,10 @@ from passlib.hash import pbkdf2_sha256
 
 import json
 
+import pprint 
+
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 
@@ -73,6 +77,35 @@ def addExpression(request):
 		return HttpResponseServerError("expression failed to save")	
 		
 		
+@csrf_exempt
+def uploadTranslationsBatch(request):
+	log("entering uploadTranslationsBatch ") 
+	
+	parsed = json.loads(request.body) 
+	log("parsed = " + str(parsed))
+	
+	pairsArr = parsed["transInfo"]["wordpairs"]
+	saved=False
+	log("length of pairsArr=" + str(len(pairsArr)))
+	for wordsPair in pairsArr:
+		exp1 = {}
+		exp1[KEY_LANG] = parsed["transInfo"]["srcLangId"]
+		exp1[KEY_EXP_STR] = wordsPair["srcWord"]["expression"]
+		exp1[KEY_FREQ]=wordsPair["srcWord"]["frequency"]
+		#handle categories! 
+		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
+		exp2 = {}
+		exp2[KEY_LANG] = parsed["transInfo"]["trgLangId"]
+		exp2[KEY_EXP_STR] = wordsPair["trgWord"]["expression"]
+		exp2[KEY_FREQ]=wordsPair["trgWord"]["frequency"]
+		#handle categories! 
+		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
+		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS)
+	if saved:
+		return HttpResponse("expressions pair saved")	
+	else:
+		return HttpResponseServerError("expressions pair failed to save")	
+
 	
 def addExpressionFull(request):
 	"""
@@ -298,7 +331,7 @@ def saveTrxPair(exp1, exp2, catsType):
 		log("validation of new Expressions failed, aborting save")
 		return False
 	
-	if not (catsType is CATS_TYPE_INTS or catsType is CATS_TYPE_INTS):
+	if not (catsType is CATS_TYPE_STRINGS or catsType is CATS_TYPE_INTS):
 		log("invalid cats typs " + catsType)
 		return False
 	
@@ -352,8 +385,9 @@ def saveTrxPair(exp1, exp2, catsType):
 		newExp1.language = loadedLanguage1
 		newExp1.frequency = exp1[KEY_FREQ]
 		newExp1.save()
-		catsToSave = Catagory.objects.filter(id__in=exp1[KEY_CATS_IDS])
-		newExp1.categories.add(*catsToSave.all())
+		if KEY_CATS_IDS in exp1:
+			catsToSave = Catagory.objects.filter(id__in=exp1[KEY_CATS_IDS])
+			newExp1.categories.add(*catsToSave.all())
 		
 	match= False
 	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=loadedLanguage2)
@@ -389,8 +423,9 @@ def saveTrxPair(exp1, exp2, catsType):
 		newExp2.language = loadedLanguage2
 		newExp2.frequency = exp2[KEY_FREQ]
 		newExp2.save()
-		catsToSave = Catagory.objects.filter(id__in=exp2[KEY_CATS_IDS])
-		newExp2.categories.add(*catsToSave.all())
+		if KEY_CATS_IDS in exp2:
+			catsToSave = Catagory.objects.filter(id__in=exp2[KEY_CATS_IDS])
+			newExp2.categories.add(*catsToSave.all())
 	
 	
 	#TODO- rid of double saving   
@@ -461,5 +496,19 @@ def handleReqLoadCategories(request):
 
 def hashPass(password):
 	return pbkdf2_sha256.hash(password)
+	
+@csrf_exempt
+def testReadObjects(request):
+	log("requeat.body=")
+	log(request.body)
+	
+	parsed = json.loads(request.body)
+	log("parsed  =" + str(parsed)) 
+	
+	print (str(parsed["k1"]));
+	print (str(parsed["k2"]));
+	print (str(parsed["k3"]));
+	return HttpResponse("test complete")
+	
 	
 	

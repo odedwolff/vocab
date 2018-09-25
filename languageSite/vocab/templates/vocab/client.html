@@ -146,6 +146,10 @@
 			<button id=btnBrowsFiles>Open File Dialog</button>	
 		</div>
 		
+		<div id=divTest class="panel1" >
+			<button id=btnTest>Test</button>	
+		</div>
+		
 		
 			
 		
@@ -662,27 +666,56 @@
 			}
 			
 			function uploadTranslatioinsBatch(uploadDataObj){
-				url = HOST + '/vocab/uploadTranslationsBatch';
+				url = HOST + '/vocab/upload-translations-batch';
 				
-				var post_data = {
-					'csrfmiddlewaretoken':"{{ csrf_token }}"
+				
+				var post_data = { 
+					'transInfo':uploadDataObj, 
 				}
 				
 				$.ajax({
 				  url: url,
 				  type:'POST',
-				  data:uploadDataObj,
-				  /**
-				  success:function(data){
-					debugQuick(data);
-					
-				  },**/
+				  data:JSON.stringify(post_data),
+				  contentType: 'application/json; charset=utf-8',
+				  dataType: 'json',
+				  async: false,
 				  success:function()
 					{(console.log("uploadDataObj succeed"))},
 				  error:function(error){
 					debugQuick(error.responseText);
 				  }
 				});
+			}
+			
+			
+			
+			function testSendObjects(){
+				url = HOST + '/vocab/test-read-objects';
+				var post_data = {
+					//'csrfmiddlewaretoken':"{{ csrf_token }}", 
+					'k1':45, 
+					'k2':"string content", 
+					'k3':{"k11":"v11", "k12":"v12"}  
+				}
+				
+				jsonData=JSON.stringify(post_data);
+				
+				
+				$.ajax({
+				  url: url,
+				  type:'POST',
+				  data:jsonData,
+				  contentType: 'application/json; charset=utf-8',
+				  dataType: 'json',
+				  async: false,	  
+				  success:function()
+					{(console.log("transaction succeeded"))},
+				  error:function(error){
+					debugQuick(error.responseText);
+				  }
+				});
+			
 			}
 
 			
@@ -718,6 +751,13 @@
 			$("#btnTest1").click(
 				clickTest1
 			);
+			
+			
+			$("#btnTest").click(
+				testSendObjects
+			);
+			
+			
 			
 			$("#btnVisibilityCatsSrc").click(
 				function()
