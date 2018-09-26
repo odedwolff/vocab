@@ -1,8 +1,8 @@
 {
 	"comment":"sample file for importing a set of words and their translations",
 
-	"srcLangId": "34",
-	"trgLangId": "83",
+	"srcLang": "language1",
+	"trgLang": "language2", 
 	
 	"wordpairs":
 	
@@ -14,6 +14,16 @@
 					},				
 					"trgWord": {
 						"expression": "hombre",
+						"frequency": "0.72"
+					}
+				},
+				{
+					"srcWord": {
+						"expression": "ant",
+						"frequency": "0.56"
+					},				
+					"trgWord": {
+						"expression": "hormiga",
 						"frequency": "0.72"
 					}
 				}

@@ -10,7 +10,6 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from django.db import IntegrityError
 
-#from passlib.apps import custom_app_context as pwd_context
 
 from passlib.hash import pbkdf2_sha256
 
@@ -34,7 +33,8 @@ KEY_CATS_IDS = "catIds"
 KEY_CATS_STRS = "catStrs"
 CATS_TYPE_STRINGS = "compareStrings"
 CATS_TYPE_INTS = "compareInts"
-
+LANG_TYPE_STRING="compareString" 
+LANG_TYPE_INTS="compareIntes"
 
 def log(msg, imortance = 0):
 	print(msg)
@@ -89,18 +89,16 @@ def uploadTranslationsBatch(request):
 	log("length of pairsArr=" + str(len(pairsArr)))
 	for wordsPair in pairsArr:
 		exp1 = {}
-		exp1[KEY_LANG] = parsed["transInfo"]["srcLangId"]
+		exp1[KEY_LANG] = parsed["transInfo"]["srcLang"]
 		exp1[KEY_EXP_STR] = wordsPair["srcWord"]["expression"]
-		exp1[KEY_FREQ]=wordsPair["srcWord"]["frequency"]
-		#handle categories! 
-		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
+		exp1[KEY_FREQ]=wordsPair["srcWord"]["frequency"] 
 		exp2 = {}
-		exp2[KEY_LANG] = parsed["transInfo"]["trgLangId"]
+		exp2[KEY_LANG] = parsed["transInfo"]["trgLang"]
 		exp2[KEY_EXP_STR] = wordsPair["trgWord"]["expression"]
 		exp2[KEY_FREQ]=wordsPair["trgWord"]["frequency"]
 		#handle categories! 
 		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
-		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS)
+		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING)
 	if saved:
 		return HttpResponse("expressions pair saved")	
 	else:
@@ -127,9 +125,7 @@ def addExpressionFull(request):
 	exp2[KEY_FREQ]=request.POST["weight2"]
 	exp2[KEY_CATS_IDS]= request.POST.getlist("cats2[]")
 	
-	#saved = saveTrxPair(languageId, expression, frq1, cats1, languageId2, expression2, frq2, cats2)
-	
-	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS)
+	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS, LANG_TYPE_INTS)
 	
 	if saved:
 		return HttpResponse("expressions pair saved")	
@@ -209,8 +205,6 @@ def getLogOnStatus(request):
 	userId = None 
 	if KEY_SESSION_LOGGED_USER in request.session:
 		userId = request.session[KEY_SESSION_LOGGED_USER]
-	#username = False
-	#isLogged = "False"
 	username = ""
 	isLogged = False
 	if userId is not None:
@@ -291,17 +285,12 @@ def validateExpression(expression, languageId, freq):
 	
 	
 
-	
-#def saveTrxPair(languageId1, expression1, freq1, cats1, languageId2, expression2, freq2, cats2):
-
-
 def extractCatIds (cats):
 	log("entering extractCatIds, arg cats=" + str(cats))
 	theResult = []
 	if not cats or len(cats) is 0:
 		return theResult
 	for cat in cats:
-		#theResult.append(cat.id)
 		theResult.append(str(cat.id))
 	return theResult
 
@@ -314,11 +303,14 @@ def extractCatStrings  (cats):
 		theResult.append(cat.category)
 	return theResult
 
-def saveTrxPair(exp1, exp2, catsType):
+	
+def saveTrxPair(exp1, exp2, catsType, langType):
 
 	"""
 	saves to database new expressions translation pair 
-	
+	the expression contain information about categories and languages that can beferredd to 
+	in IDs or String values (which are unique), the last 2 parametrs indicated which fields
+	are used to identify categroies and languages 
 	TODO
 	*implment hadling of categories lists for both new expressions 
 	"""
@@ -330,19 +322,26 @@ def saveTrxPair(exp1, exp2, catsType):
 	if not validateExpression(exp1[KEY_EXP_STR], exp1[KEY_LANG], exp1[KEY_FREQ]) or not validateExpression(exp2[KEY_EXP_STR], exp2[KEY_LANG], exp2[KEY_FREQ]):
 		log("validation of new Expressions failed, aborting save")
 		return False
-	
 	if not (catsType is CATS_TYPE_STRINGS or catsType is CATS_TYPE_INTS):
 		log("invalid cats typs " + catsType)
 		return False
+	if not (langType is LANG_TYPE_STRING or langType is LANG_TYPE_INTS):
+		log("invalid language typs " + langType)
+		return False
 	
 	#load languages
-	
-	loadedLanguage1 = Language.objects.get(id=exp1[KEY_LANG])
+	if langType is LANG_TYPE_INTS:
+		loadedLanguage1 = Language.objects.get(id=exp1[KEY_LANG])
+	else:
+		loadedLanguage1 = Language.objects.get(language=exp1[KEY_LANG])
 	if loadedLanguage1 is None:
 		log("could not load language with id " + exp1[KEY_LANG])
 		return False
 	
-	loadedLanguage2 = Language.objects.get(id=exp2[KEY_LANG])
+	if langType is LANG_TYPE_INTS:
+		loadedLanguage2 = Language.objects.get(id=exp2[KEY_LANG])
+	else:
+		loadedLanguage2 = Language.objects.get(language=exp2[KEY_LANG])	
 	if loadedLanguage2 is None:
 		log("could not load language with id " + exp2[KEY_LANG])
 		return False
@@ -352,21 +351,11 @@ def saveTrxPair(exp1, exp2, catsType):
 	match= False
 	
 	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=loadedLanguage1)
-	#qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language__id=exp1[KEY_LANG])
-	
-	#log("ran query on DB looking for expression " + exp1[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
-	#log("number of matchint reults: " + str(len(qSet)))
-	#log("iterating loaded expressions")
-	
 	
 	if qSet:
-		#newExp1 = qSet[0]
 		for loadedExp in qSet:
-			#log("checking match for loaded expression " + str(loadedExp))
 			loadedExpCats= loadedExp.categories.all()
-			#log("loaded exp cats=" + str(loadedExpCats))
 			if(catsType is CATS_TYPE_INTS):
-				#loadedCats = extractCatIds(loadedExp.categories)
 				loadedCats = extractCatIds(loadedExp.categories.all())
 			else:
 				loadedCats = extractCatStrings(loadedExp.categories.all())
@@ -395,17 +384,8 @@ def saveTrxPair(exp1, exp2, catsType):
 		
 	match= False
 	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=loadedLanguage2)
-	#qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language__id=exp2[KEY_LANG])
-	
-	
-	
-	#log("ran query on DB looking for expression " + exp2[KEY_EXP_STR] + " and language " + str(loadedLanguage2))
-	#log("number of matchint reults: " + str(len(qSet)))
-	#log("iterating loaded expressions")
-	
 	
 	if qSet:
-		#newExp1 = qSet[0]
 		for loadedExp in qSet:	
 			#log("checking match for loaded expression " + str(loadedExp))
 			loadedExpCats= loadedExp.categories.all()
