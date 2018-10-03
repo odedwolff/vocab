@@ -92,10 +92,14 @@ def uploadTranslationsBatch(request):
 		exp1[KEY_LANG] = parsed["transInfo"]["srcLang"]
 		exp1[KEY_EXP_STR] = wordsPair["srcWord"]["expression"]
 		exp1[KEY_FREQ]=wordsPair["srcWord"]["frequency"] 
+		if "categories" in wordsPair["srcWord"]:
+			exp1[KEY_CATS_STRS] =  wordsPair["srcWord"]["categories"]
 		exp2 = {}
 		exp2[KEY_LANG] = parsed["transInfo"]["trgLang"]
 		exp2[KEY_EXP_STR] = wordsPair["trgWord"]["expression"]
 		exp2[KEY_FREQ]=wordsPair["trgWord"]["frequency"]
+		if "categories" in wordsPair["trgWord"]:
+			exp1[KEY_CATS_STRS] =  wordsPair["trgWord"]["categories"]
 		#handle categories! 
 		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
 		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING)
@@ -364,6 +368,25 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 			log("added new language exp1[KEY_LANG]")
 		else:
 			lang2=lang1Set[0] 
+	
+	
+	#check whether any of the categories is new. if so, create it in database. 
+	#this only applies when cats are given as strings 
+	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp1:
+		sentCats = exp1[KEY_CATS_STRS]
+		for cat in sentCats:
+			q = Catagory.objects.filter(category=cat)
+			if len(q) is 0:
+				Catagory(category=cat).save()
+	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp2:
+		sentCats = exp2[KEY_CATS_STRS]
+		for cat in sentCats:
+			q = Catagory.objects.filter(category=cat)
+			if len(q) is 0:
+				Catagory(category=cat).save()
+		
+	
+	
 	
 	#check whether expression already exists, requires match of language, expresson and categories (that is,
 	#having the exact same set of categories)
