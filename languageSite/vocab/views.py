@@ -329,28 +329,47 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 		log("invalid language typs " + langType)
 		return False
 	
+	#if language is indicated via ID it must load successfuly. however, if it is inidicated 
+	#by name, it will be checked to exist, and if it doesnt a new language will be created with the given name 
+	
 	#load languages
 	if langType is LANG_TYPE_INTS:
-		loadedLanguage1 = Language.objects.get(id=exp1[KEY_LANG])
+		lang1Set = Language.objects.filter(id=exp1[KEY_LANG])
+		if len(lang1Set) is 0:
+			log("could not load language with id " + exp1[KEY_LANG])
+			return False
+		else:
+			lang1=lang1Set[0] 
+		lang1Set = Language.objects.filter(id=exp2[KEY_LANG])
+		if len(lang1Set) is 0:
+			log("could not load language with id " + exp2[KEY_LANG])
+			return False
+		else:
+			lang2=lang1Set[0] 
+			
+	#else- refer to language by name, not id. if such a language does not yet exist, create it and save it 
 	else:
-		loadedLanguage1 = Language.objects.get(language=exp1[KEY_LANG])
-	if loadedLanguage1 is None:
-		log("could not load language with id " + exp1[KEY_LANG])
-		return False
-	
-	if langType is LANG_TYPE_INTS:
-		loadedLanguage2 = Language.objects.get(id=exp2[KEY_LANG])
-	else:
-		loadedLanguage2 = Language.objects.get(language=exp2[KEY_LANG])	
-	if loadedLanguage2 is None:
-		log("could not load language with id " + exp2[KEY_LANG])
-		return False
+		lang1Set = Language.objects.filter(language=exp1[KEY_LANG])
+		if len(lang1Set) is 0:
+			lang1 = Language(language=exp1[KEY_LANG])
+			lang1.save()
+			log("added new language exp1[KEY_LANG]")
+		else:
+			lang1=lang1Set[0] 
+		
+		lang1Set = Language.objects.filter(language=exp2[KEY_LANG])
+		if len(lang1Set) is 0:
+			lang2 = Language(language=exp2[KEY_LANG])
+			lang2.save()
+			log("added new language exp1[KEY_LANG]")
+		else:
+			lang2=lang1Set[0] 
 	
 	#check whether expression already exists, requires match of language, expresson and categories (that is,
 	#having the exact same set of categories)
 	match= False
 	
-	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=loadedLanguage1)
+	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=lang1)
 	
 	if qSet:
 		for loadedExp in qSet:
@@ -375,7 +394,7 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 		log("did not match existing epxression1, creating a new instance")
 		newExp1 = Expression()
 		newExp1.expression  = exp1[KEY_EXP_STR]
-		newExp1.language = loadedLanguage1
+		newExp1.language = lang1
 		newExp1.frequency = exp1[KEY_FREQ]
 		newExp1.save()
 		if KEY_CATS_IDS in exp1:
@@ -383,7 +402,7 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 			newExp1.categories.add(*catsToSave.all())
 		
 	match= False
-	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=loadedLanguage2)
+	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=lang2)
 	
 	if qSet:
 		for loadedExp in qSet:	
@@ -409,7 +428,7 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 		log("did not match existing epxression2, creating a new instance")
 		newExp2 = Expression()
 		newExp2.expression  = exp2[KEY_EXP_STR]
-		newExp2.language = loadedLanguage2
+		newExp2.language = lang2
 		newExp2.frequency = exp2[KEY_FREQ]
 		newExp2.save()
 		if KEY_CATS_IDS in exp2:
