@@ -79,6 +79,12 @@ def addExpression(request):
 		
 @csrf_exempt
 def uploadTranslationsBatch(request):
+	"""
+	handles an array of translations pairs to be added, for instance when client 
+	uploads a file containing translations 
+	
+	"""
+	
 	log("entering uploadTranslationsBatch ") 
 	
 	parsed = json.loads(request.body) 
@@ -99,7 +105,7 @@ def uploadTranslationsBatch(request):
 		exp2[KEY_EXP_STR] = wordsPair["trgWord"]["expression"]
 		exp2[KEY_FREQ]=wordsPair["trgWord"]["frequency"]
 		if "categories" in wordsPair["trgWord"]:
-			exp1[KEY_CATS_STRS] =  wordsPair["trgWord"]["categories"]
+			exp2[KEY_CATS_STRS] =  wordsPair["trgWord"]["categories"]
 		#handle categories! 
 		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
 		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING)
@@ -319,6 +325,9 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 	*implment hadling of categories lists for both new expressions 
 	"""
 	
+	
+	#just some validations 
+	
 	log("entering saveTrxPair(exp1, exp2....)")
 	log("exp1= " + str(exp1))
 	log("exp2= " + str(exp2))
@@ -333,10 +342,10 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 		log("invalid language typs " + langType)
 		return False
 	
-	#if language is indicated via ID it must load successfuly. however, if it is inidicated 
+	#if language is referred to by ID it must load successfuly. however, if it is inidicated 
 	#by name, it will be checked to exist, and if it doesnt a new language will be created with the given name 
 	
-	#load languages
+	#languages are referred by id- load languages
 	if langType is LANG_TYPE_INTS:
 		lang1Set = Language.objects.filter(id=exp1[KEY_LANG])
 		if len(lang1Set) is 0:
@@ -392,21 +401,29 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 	#having the exact same set of categories)
 	match= False
 	
+	#check for match of expression and language 
 	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], language=lang1)
 	
+	
+	#for all matches, check for match of categories list
 	if qSet:
 		for loadedExp in qSet:
-			loadedExpCats= loadedExp.categories.all()
+			loadedCatsFullObjs= loadedExp.categories.all()
 			if(catsType is CATS_TYPE_INTS):
-				loadedCats = extractCatIds(loadedExp.categories.all())
+				loadedCats = extractCatIds(loadedCatsFullObjs)
+				if KEY_CATS_IDS in exp1:
+					sentCats = exp1[KEY_CATS_IDS]
+				else:
+					sentCats = []
+			#else- cats type is strings 
 			else:
-				loadedCats = extractCatStrings(loadedExp.categories.all())
-		
-			if KEY_CATS_IDS in exp1:
-				exp1CatIds = exp1[KEY_CATS_IDS]
-			else:
-				exp1CatIds = []
-			if	compareCategories(exp1CatIds, loadedCats):
+				loadedCats = extractCatStrings(loadedCatsFullObjs)
+				if KEY_CATS_STRS in exp1:
+					sentCats = exp1[KEY_CATS_STRS]
+				else:
+					sentCats = []
+
+			if	compareCategories(sentCats, loadedCats):
 				newExp1= loadedExp
 				match= True
 				log("matched existing epxression1")
@@ -420,31 +437,43 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 		newExp1.language = lang1
 		newExp1.frequency = exp1[KEY_FREQ]
 		newExp1.save()
-		if KEY_CATS_IDS in exp1:
-			catsToSave = Catagory.objects.filter(id__in=exp1[KEY_CATS_IDS])
-			newExp1.categories.add(*catsToSave.all())
+		if(catsType is CATS_TYPE_INTS):
+			if KEY_CATS_IDS in exp1:
+				catsToSave = Catagory.objects.filter(id__in=exp1[KEY_CATS_IDS])
+				newExp1.categories.add(*catsToSave.all())
+		else:
+			if KEY_CATS_STRS in exp1:
+				catsToSave = Catagory.objects.filter(category__in=exp1[KEY_CATS_STRS])
+				newExp1.categories.add(*catsToSave.all())
 		
+	
+	#same thing for expression2 
+	
 	match= False
 	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], language=lang2)
 	
 	if qSet:
 		for loadedExp in qSet:	
-			#log("checking match for loaded expression " + str(loadedExp))
-			loadedExpCats= loadedExp.categories.all()
-			#log("loaded exp cats=" + str(loadedExpCats))
+			loadedCatsFullObjs= loadedExp.categories.all()
 			if(catsType is CATS_TYPE_INTS):
-				loadedCats = extractCatIds(loadedExpCats)
+				loadedCats = extractCatIds(loadedCatsFullObjs)
+				if KEY_CATS_IDS in exp2:
+					sentCats = exp2[KEY_CATS_IDS]
+				else:
+					sentCats = []
+			#else- cats type is strings 
 			else:
-				loadedCats = extractCatStrings(loadedExp.categories.all())
-			
-			if KEY_CATS_IDS in exp2:
-				exp1CatIds = exp2[KEY_CATS_IDS]
-			else:
-				exp1CatIds = []
-			if	compareCategories(exp1CatIds, loadedCats):
+				loadedCats = extractCatStrings(loadedCatsFullObjs)
+				if KEY_CATS_STRS in exp2:
+					sentCats = exp2[KEY_CATS_STRS]
+				else:
+					sentCats = []
+
+			if	compareCategories(sentCats, loadedCats):
 				newExp2= loadedExp
 				match= True
-				log("matched existing epxression2")
+				log("matched existing epxression1")
+				break 
 				
 	#else:
 	if not match:
@@ -454,10 +483,15 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 		newExp2.language = lang2
 		newExp2.frequency = exp2[KEY_FREQ]
 		newExp2.save()
-		if KEY_CATS_IDS in exp2:
-			catsToSave = Catagory.objects.filter(id__in=exp2[KEY_CATS_IDS])
-			newExp2.categories.add(*catsToSave.all())
-	
+		if(catsType is CATS_TYPE_INTS):
+			if KEY_CATS_IDS in exp2:
+				catsToSave = Catagory.objects.filter(id__in=exp2[KEY_CATS_IDS])
+				newExp2.categories.add(*catsToSave.all())
+		else:
+			if KEY_CATS_STRS in exp2:
+				catsToSave = Catagory.objects.filter(category__in=exp2[KEY_CATS_STRS])
+				newExp2.categories.add(*catsToSave.all())
+			
 	
 	#TODO- rid of double saving   
 	newExp2.save()
