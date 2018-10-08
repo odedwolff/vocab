@@ -504,13 +504,22 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 
 def handleReqAddCat(request):
 	newCat = request.POST["cat"]
-	insertCategory(newCat)
-	return HttpResponse("new category saved")
+	saved = insertCategory(newCat)
+	if saved:
+		return HttpResponse("new category saved")
+	else:
+		return HttpResponseServerError("new catgory failed to save, did you try to save a duplicate value?")
 	
 def insertCategory(categroyName):
+	rs = Catagory.objects.filter(category=categroyName)
+	#duplicate
+	if rs:
+		log("duplicate name for category, not saved")
+		return False 
 	cat = Catagory()
 	cat.category = categroyName
 	cat.save()
+	return True 
 	
 def compareCategories(list1, list2):
 	"""
