@@ -561,7 +561,7 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
-					
+					loadCategories();
 				  },
 				  error:function(error){
 					//console.log(error);
@@ -609,6 +609,7 @@
 			//<input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> 
 				var catStr, catId, newDomElmStr
 				catsList = catsData.loadedCats;
+				$(domElmContainer).empty();
 				for(var i = 0; i < catsList.length; i++)
 				{
 					catStr= catsList[i]["cat"];
@@ -783,6 +784,7 @@
 				//alert(fileName)
 				//alert(e.target);
 				readSingleFile(e);
+				$(this).val("");
 				$(this).val("");
 			}
 			);
