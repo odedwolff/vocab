@@ -584,5 +584,21 @@ def testReadObjects(request):
 	print (str(parsed["k3"]));
 	return HttpResponse("test complete")
 	
+
+@csrf_exempt
+def handleRequestNextQuestion(request):
+	#TODO- extract variables from reqeust
+	srcLanguageId=None
+	trgLangId=None
+	srcCategories=None
+	uer=None
+	##
+	
+	Q=Expression.objects.all()
+	for cat in srcCategories:
+		Q = Q.filter(categories__category=cat.category)
+	
+	
+	
 	
 	

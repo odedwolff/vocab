@@ -42,7 +42,25 @@ class Expression(models.Model):
 	def __str__(self):
 		return self.expression
 
+
+
+
+
+
+class AnswerAttempt(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	sourceExpression = models.ForeignKey(Expression, on_delete=models.CASCADE)
+	targetLanguage = models.ForeignKey(Language, on_delete=models.CASCADE)
+	date = models.DateTimeField(default=None, blank=True, null=True)
+	correct = models.NullBooleanField()
 	
+	def __str__(self):
+		return ("User,Expression,Language=" + str(self.user)+"," + str(self.sourceExpression)+","+str(self.targetLanguage))
+	
+	
+"""
+
+		
 #represents history of anwering attempts for scepcific (user, source word, target language). 
 class StatPoint(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -59,6 +77,6 @@ class Attempt(models.Model):
 	attemptsList = models.ForeignKey(AttemptsHistory, on_delete=models.CASCADE)
 	
 	
-
+"""
 
 	
