@@ -63,7 +63,10 @@ class AggregatedWordUserStat(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	expression = models.ForeignKey(Expression, on_delete=models.CASCADE)
 	targetLanguage = models.ForeignKey(Language, on_delete=models.CASCADE)
+	attempts = models.IntegerField()
+	successCount = models.IntegerField()
 	
+
 	
 """
 
