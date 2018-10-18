@@ -56,6 +56,13 @@ class AnswerAttempt(models.Model):
 	
 	def __str__(self):
 		return ("User,Expression,Language=" + str(self.user)+"," + str(self.sourceExpression)+","+str(self.targetLanguage))
+
+
+
+class AggregatedWordUserStat(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	expression = models.ForeignKey(Expression, on_delete=models.CASCADE)
+	targetLanguage = models.ForeignKey(Language, on_delete=models.CASCADE)
 	
 	
 """
