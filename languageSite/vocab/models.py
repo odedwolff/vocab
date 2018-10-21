@@ -59,7 +59,7 @@ class AnswerAttempt(models.Model):
 
 
 
-class AggregatedWordUserStat(models.Model):
+class AggrScore(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	expression = models.ForeignKey(Expression, on_delete=models.CASCADE)
 	targetLanguage = models.ForeignKey(Language, on_delete=models.CASCADE)
