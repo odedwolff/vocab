@@ -1,0 +1,50 @@
+
+
+
+	
+
+	
+	***select all pairs of translations*****
+	
+	select src_exp.expression as source_expression, trg_exp.expression as target_expression 
+		from (vocab_expression as src_exp join vocab_expression_translations as trx on trx.from_expression_id = src_exp.id) 
+		join vocab_expression as trg_exp on trx.to_expression_id = trg_exp.id
+		group by source_expression
+		
+	
+		
+	
+	
+	
+	
+	*** a row for each target (user, src expression, target expression)
+	
+	select exp.id as src_exp_id, scr.id as scr_id, exp.frequency as freq, ifnull(scr.successcount/scr.attempts * exp.frequency, 0.5)  as factor,
+    trg_exp.id as trg_exp_id	
+	from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
+	   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
+	   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id ) 
+	where exp.language_id = 1 and trg_exp.language_id=5 and scr.user_id = 29
+	order by factor * rand();
+	
+	
+	
+	
+	*this is the main query for selecting the next 
+	*TODO -peroperly document this nightmare
+	
+	*** grooped all target translations, so a row for each (user, src expression, target language)
+	*** (the last parameter is target language, not expression)
+	
+	select exp.id as src_exp_id, scr.id as scr_id, exp.frequency as freq, ifnull(scr.successcount/scr.attempts * exp.frequency, 0.5)  as factor,
+    trg_exp.id as trg_exp_id	
+	from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
+	   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
+	   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id ) 
+	where exp.language_id = 1 and trg_exp.language_id=5 and (scr.id is Null or (scr.user_id = 29 and scr.targetLanguage_id=5))
+	group by exp.id, trg_exp.language_id
+	order by factor * rand();
+   
+   
+   
+
