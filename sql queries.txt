@@ -57,11 +57,78 @@
    
     select *, factor*rnd as mul_fac from(
 		select exp.id as src_exp_id, exp.expression as exp, scr.id as scr_id, exp.frequency as freq,trg_exp.id as trg_exp_id, trg_exp.expression as trg_if_1row, 
-			 ifnull(scr.successcount/scr.attempts * exp.frequency, 0.5)  as factor, avg(rand()) as rnd,COUNT(trg_exp.id)
+			 ifnull( 1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2) * exp.frequency, 0.5)  as factor, avg(rand()) as rnd,COUNT(trg_exp.id) as cnt_trg_exp
 		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
 		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
 		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id ) 
 		where exp.language_id = 1 and trg_exp.language_id=5 and (scr.id is Null or (scr.user_id = 29 and scr.targetLanguage_id=5))
 		group by exp.id, trg_exp.language_id
     )as tz order by mul_fac desc
+	
+	
+	
+	
+	
+	***with factoring of 1-(0.9x)^2, but still no graceful start****
+	
+	select *, factor*rnd as mul_fac from(
+		select exp.id as src_exp_id, exp.expression as exp, scr.id as scr_id, exp.frequency as freq,trg_exp.id as trg_exp_id, trg_exp.expression as trg_if_1row,
+			ifnull( 1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2) * exp.frequency, 0.5)  as factor,
+			avg(rand()) as rnd,COUNT(trg_exp.id) as cnt_trg_exp
+		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
+		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
+		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id )
+		where exp.language_id = 1 and trg_exp.language_id=5 and (scr.id is Null or (scr.user_id = 29 and scr.targetLanguage_id=5))
+		group by exp.id, trg_exp.language_id
+    )as tz order by mul_fac desc
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	**has grace, funtions very basically,needs testing, the grace is calcultate in join caluse(subselect), but not yet included in the factor
+	
+	 select *, fct*rnd as mul_fac from(
+		select exp.id as src_w_id, exp.expression as wrd, scr.id as scr_id, exp.frequency as frq,trg_exp.id as t_wrd_id, trg_exp.expression as t_wrd,
+			ifnull( 1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2) * exp.frequency, 0.5)  as fct,
+			avg(rand()) as rnd,COUNT(trg_exp.id) as cnt_t_wrd, grc
+		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
+		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
+		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id 
+		   left join (select LEAST(pow(0.13*scr1.attempts,4),1)as grc, scr1.id from  vocab_aggrscore scr1) as rt on rt.id=scr.id) 
+		where exp.language_id = 1 and trg_exp.language_id=5 and (scr.id is Null or (scr.user_id = 29 and scr.targetLanguage_id=5))
+		group by exp.id, trg_exp.language_id
+    )as tz order by mul_fac desc
+	
+	
+	
+	
+	
+	
+	**dev**
+	
+	select LEAST(pow(0.13*5,4),1)
+	
+	pow(5,4)
+	
+	inner join (select LEAST(pow(0.13*scr.attempts,4),1) as xp_f )
+	
+	 
+    select *, fct*rnd as mul_fac from(
+		select exp.id as src_w_id, exp.expression as wrd, scr.id as scr_id, exp.frequency as frq,trg_exp.id as t_wrd_id, trg_exp.expression as t_wrd,
+			ifnull( 1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2) * exp.frequency, 0.5)  as fct,
+			avg(rand()) as rnd,COUNT(trg_exp.id) as cnt_t_wrd, grc
+		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
+		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
+		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id 
+		   left join (select LEAST(pow(0.13*scr1.attempts,4),1)as grc, scr1.id from  vocab_aggrscore scr1) as rt on rt.id=scr.id) 
+		where exp.language_id = 1 and trg_exp.language_id=5 and (scr.id is Null or (scr.user_id = 29 and scr.targetLanguage_id=5))
+		group by exp.id, trg_exp.language_id
+    )as tz order by mul_fac desc
+
+
 
