@@ -92,6 +92,7 @@
 	
 	**has grace, funtions very basically,needs testing, the grace is calcultate in join caluse(subselect), but not yet included in the factor
 	
+	
 	 select *, fct*rnd as mul_fac from(
 		select exp.id as src_w_id, exp.expression as wrd, scr.id as scr_id, exp.frequency as frq,trg_exp.id as t_wrd_id, trg_exp.expression as t_wrd,
 			ifnull( 1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2) * exp.frequency, 0.5)  as fct,
@@ -107,20 +108,43 @@
 	
 	
 	
+	*this query is choosing the next question. it needs input parameters:user,source language,list of paramers for source word, target language.
+	a trnasltion pair is a pairing of serouce and target epxpressions. translations create a many to many relations between the Expression 
+	table and itself (for source and target expressions). that is, an expression could have multiple tanslations, and vice versa.
+	when choosing the next word, all target translations for given word and  given target language are grouped to one row.
+	(this is fine, because the quear doesnt actuall depend on the target word columns) 
+	each (source Expression, target languge, user) combination can either have an AggrScore, or not. if it does it means that the user in question
+	has already attempted to guess the word in question at least once. if it doesnt, he hasnt. 
+	the next expression will be chosen randomally, in a distribution that favours words that have high weight(think frequency in language use), 
+	and it will favour words for wich the user has a record of unsatisfying performance. the latter can only be factored in case the user acutally 
+	has a relevant record. if he doesnt, as value for that factor well use a default constant. 
+	
+	some of the key bits of the query:	
+		ifnull(((1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2))*grc + (1.0*1-grc))   * exp.frequency, 0.5)  as fct,
+		
+	the main factor is being calculated wih the function 1-0.9X^2, that has value close to 1 when x is close to 0, and close 
+	to 0 when x is close to 1. we substitue x for success/attempts ratio. so we care about [0,1] range. dividing by zero is also taken care of. 
+	the idea is that a good performance history ratio, close to 1, will yeld small factor, because we want expression with worse performance to be 
+	more likely to get elected (dont waste time practice what you already know).
+	there is, however, an issue at the beginnning, as the number of attempts is still too low to have statistical meaning so to speak, we 
+    want that the factor will not be fully considered at the begninng, but rather will start slowly to kick in, until at around 10 attempt it should
+	reach the max of 1.0. for that we have the grc variable, that maps integers[0,inf] to real(0.1), with roughly 0->0.0, (10 and up)->1.0 and smooth growing 
+	in between. we use it in such a way that at low attempts that factor will be high even if the performance are good. the rational is that 
+	if user guesses a word correctly one time, it might be because he just enoucntered it, so we demands repeated correct answering to be considered as an 
+	indication of knowing the translation (all these factors can of course be adjusted, maybe 10 is a little high)
+	
+	the way that grc is calculated:
+			   left join (select LEAST(pow(0.13*scr1.attempts,4),1)as grc, scr1.id from  vocab_aggrscore scr1) as rt on rt.id=scr.id) 
+	this last part of the JOIN clause is needed, to make the variable avaliable for reference in the bit mentioned above. 
+	it uses(0.13x)^4 until it reaches 1.0, it's max (x bein number of attempts)
+
 	
 	
-	**dev**
+	**seems to be basically working ok, needs testing with data**
 	
-	select LEAST(pow(0.13*5,4),1)
-	
-	pow(5,4)
-	
-	inner join (select LEAST(pow(0.13*scr.attempts,4),1) as xp_f )
-	
-	 
     select *, fct*rnd as mul_fac from(
 		select exp.id as src_w_id, exp.expression as wrd, scr.id as scr_id, exp.frequency as frq,trg_exp.id as t_wrd_id, trg_exp.expression as t_wrd,
-			ifnull( 1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2) * exp.frequency, 0.5)  as fct,
+			ifnull(((1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .9), 2))*grc + (1.0*1-grc))   * exp.frequency, 0.5)  as fct,
 			avg(rand()) as rnd,COUNT(trg_exp.id) as cnt_t_wrd, grc
 		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
 		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
