@@ -19,6 +19,7 @@ import pprint
 
 from django.views.decorators.csrf import csrf_exempt
 
+from django.db import connection	
 
 
 
@@ -314,7 +315,11 @@ def extractCatStrings  (cats):
 	return theResult
 
 	
-def saveTrxPair(exp1, exp2, catsType, langType):
+#29102018- changing data model. catetries list will be flatted out to a string- a singla field in the Expression class. 
+#the Catatgory class will exist still, for enabling selecting of categories when inserting a new expression, but they will not be saved 
+#as PK to the Categories table
+	
+def saveTrxPairOld(exp1, exp2, catsType, langType):
 
 	"""
 	saves to database new expressions translation pair 
@@ -598,6 +603,200 @@ def handleRequestNextQuestion(request):
 	for cat in srcCategories:
 		Q = Q.filter(categories__category=cat.category)
 	
+	
+
+	
+def saveTrxPair(exp1, exp2, catsType, langType):
+
+	"""
+	saves to database new expressions translation pair 
+	the expression contain information about categories and languages that can beferredd to 
+	in IDs or String values (which are unique), the last 2 parametrs indicated which fields
+	are used to identify categroies and languages 
+	TODO
+	*implment hadling of categories lists for both new expressions 
+	"""
+	
+	
+	#just some validations 
+	
+	log("entering saveTrxPair(exp1, exp2....)")
+	log("exp1= " + str(exp1))
+	log("exp2= " + str(exp2))
+	
+	if not validateExpression(exp1[KEY_EXP_STR], exp1[KEY_LANG], exp1[KEY_FREQ]) or not validateExpression(exp2[KEY_EXP_STR], exp2[KEY_LANG], exp2[KEY_FREQ]):
+		log("validation of new Expressions failed, aborting save")
+		return False
+	if not (catsType is CATS_TYPE_STRINGS or catsType is CATS_TYPE_INTS):
+		log("invalid cats typs " + catsType)
+		return False
+	if not (langType is LANG_TYPE_STRING or langType is LANG_TYPE_INTS):
+		log("invalid language typs " + langType)
+		return False
+	
+	#if language is referred to by ID it must load successfuly. however, if it is inidicated 
+	#by name, it will be checked to exist, and if it doesnt a new language will be created with the given name 
+	
+	#languages are referred by id- load languages
+	if langType is LANG_TYPE_INTS:
+		lang1Set = Language.objects.filter(id=exp1[KEY_LANG])
+		if len(lang1Set) is 0:
+			log("could not load language with id " + exp1[KEY_LANG])
+			return False
+		else:
+			lang1=lang1Set[0] 
+		lang1Set = Language.objects.filter(id=exp2[KEY_LANG])
+		if len(lang1Set) is 0:
+			log("could not load language with id " + exp2[KEY_LANG])
+			return False
+		else:
+			lang2=lang1Set[0] 
+			
+	#else- refer to language by name, not id. if such a language does not yet exist, create it and save it 
+	else:
+		lang1Set = Language.objects.filter(language=exp1[KEY_LANG])
+		if len(lang1Set) is 0:
+			lang1 = Language(language=exp1[KEY_LANG])
+			lang1.save()
+			log("added new language exp1[KEY_LANG]")
+		else:
+			lang1=lang1Set[0] 
+		
+		lang1Set = Language.objects.filter(language=exp2[KEY_LANG])
+		if len(lang1Set) is 0:
+			lang2 = Language(language=exp2[KEY_LANG])
+			lang2.save()
+			log("added new language exp1[KEY_LANG]")
+		else:
+			lang2=lang1Set[0] 
+	
+	
+	#check whether any of the categories is new. if so, create it in database. 
+	#this only applies when cats are given as strings 
+	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp1:
+		sentCats = exp1[KEY_CATS_STRS]
+		for cat in sentCats:
+			q = Catagory.objects.filter(category=cat)
+			if len(q) is 0:
+				Catagory(category=cat).save()
+	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp2:
+		sentCats = exp2[KEY_CATS_STRS]
+		for cat in sentCats:
+			q = Catagory.objects.filter(category=cat)
+			if len(q) is 0:
+				Catagory(category=cat).save()
+		
+	
+	
+	
+	#check whether expression already exists, requires match of language, expresson and categories (that is,
+	#having the exact same set of categories)
+	match= False
+	
+	cats1 = []
+	cats2 = []
+	cats1F1atted=""
+	cats2F1atted=""
+	
+	if catsType is CATS_TYPE_STRINGS:
+		if KEY_CATS_STRS in exp1:
+			cats1= loadCatsId(exp1[KEY_CATS_STRS])
+		if KEY_CATS_STRS in exp2:
+			cats2= loadCatsId(exp2[KEY_CATS_STRS])
+	else:
+		cats1= exp1[KEY_CATS_IDS]
+		cats2= exp2[KEY_CATS_IDS]
+	
+	log("cat1=" + str(cats1))
+	log("cat2=" + str(cats2))
+
+
+	
+	if cats1:
+		cats1.sort()
+		cats1F1atted = json.dumps(cats1)
+	else:
+		cats1F1atted = ""
+	if cats2:
+		cats2.sort()
+		cats2F1atted = json.dumps(cats2)
+	else:
+		cats2F1atted = ""
+		
+	log("cats1F1atted=" + cats1F1atted)	
+	log("cats2F1atted=" + cats2F1atted)	
+	
+	
+	
+	#try to load matching expression from database  for exp1
+	qSet = Expression.objects.filter(expression=exp1[KEY_EXP_STR], categories_ser=cats1F1atted, language=lang1)
+	#a matching epxression exists
+	if qSet:
+		persistnaceExp1= qSet[0]	
+	#else, create a new expression  
+	else:
+		log("did not match existing epxression1, creating a new instance")
+		persistnaceExp1 = Expression()
+		persistnaceExp1.expression  = exp1[KEY_EXP_STR]
+		persistnaceExp1.language = lang1
+		persistnaceExp1.frequency = exp1[KEY_FREQ]
+		persistnaceExp1.save()
+		persistnaceExp1.categories_ser = cats1F1atted
+		
+	#-----same thing for expression2 
+	
+	qSet = Expression.objects.filter(expression=exp2[KEY_EXP_STR], categories_ser=cats2F1atted, language=lang2)
+	#a matching epxression exists
+	if qSet:
+		persistnaceExp2= qSet[0]	
+	#else, create a new expression  
+	else:
+		log("did not match existing epxression1, creating a new instance")
+		persistnaceExp2 = Expression()
+		persistnaceExp2.expression  = exp2[KEY_EXP_STR]
+		persistnaceExp2.language = lang2
+		persistnaceExp2.frequency = exp2[KEY_FREQ]
+		persistnaceExp2.save()
+		persistnaceExp2.categories_ser = cats2F1atted
+	
+	#TODO- rid of double saving   
+	persistnaceExp2.save()
+	persistnaceExp1.save()
+	persistnaceExp1.translations.add(persistnaceExp2)
+	persistnaceExp2.save()
+	persistnaceExp1.save()
+	return True 
+
+
+
+	
+#loads from database a list of categories by their name reference 	
+def loadCatsId (catsArr):
+	log("entering loadCatsId, args:" + str(catsArr))
+	#empts, nothing to load
+	if not catsArr:
+		return []
+	
+	inClause = "("
+	for i,cat in enumerate(catsArr):
+		inClause += "'" + cat + "'"
+		if(i<len(catsArr) - 1):
+			inClause+=","
+	inClause += ")"
+	query= "select id from vocab_catagory where category in " + inClause
+	log("paramaterized query= " + query)
+	crs = connection.cursor()
+	crs.execute(query)
+	rSet  = crs.fetchall()
+	out = []
+	for elm in rSet:
+		out.append(elm[0])
+	log("returning= " + str(out))
+	return out
+	
+
+#serObj = json.dumps(obj)
+#json.loads(serObj)
 	
 	
 	

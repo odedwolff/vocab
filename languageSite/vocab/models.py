@@ -39,6 +39,8 @@ class Expression(models.Model):
 	translations = models.ManyToManyField("self")
 	categories = models.ManyToManyField(Catagory)
 	
+	categories_ser = models.CharField(max_length=100, null=True)
+	
 	def __str__(self):
 		return self.expression
 
