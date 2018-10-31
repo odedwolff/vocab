@@ -109,7 +109,7 @@
 					</fieldset> 
 				</div>
 			</div>
-			<button id=submitExpression>submit single</button>
+			<!--<button id=submitExpression>submit single</button>-->
 			<button id=submitExpressionWTrx>submit full</button>
 		</div>
 		
@@ -146,6 +146,35 @@
 			<button id=btnBrowsFiles>Open File Dialog</button>	
 		</div>
 		
+		
+		
+		<div id=divNextQ class="panel1" >
+			<button id=btnNextQ>next question</button>
+			<div>
+				<button id="btnVisibilityCatsNextQ">+-</button>
+			</div>
+			<div id=divNextQCats>
+				<fieldset id="fieldSetNextCats">  
+				<legend>categories</legend>  
+					<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   						<br>  
+				</fieldset> 
+			</div>
+			<div id="divLangListNextQSrc">
+				language source 
+				<select name="languagesNextQSrc" id="langListNextQSrc">
+					
+				</select>
+			</div>
+			<div id="divLangListNextQTrg">
+				language target
+				<select name="languagesNextQTrg" id="langListNextQTrg">
+					
+				</select>
+			</div>
+			
+		</div>
+		
+		
 		<div id=divTest class="panel1" >
 			<button id=btnTest>Test</button>	
 		</div>
@@ -160,6 +189,7 @@
 			var HOST = "http://localhost:8000";
 			var INPUT_GRP_SRC_EXP = "inputGroupSrcExp";
 			var INPUT_GRP_TRG_EXP = "inputGroupTrgExp";
+			var INPUT_TRP_NEXT_Q = "inputGroupNextQ"
 			/**
 			todo - each language should probably have its own categries, a category should be a subset of a language (consider 
 			rename simply to "subsest" or simlirly )
@@ -193,7 +223,8 @@
 			//true inidicated visible and vice verca 
 			var visStatus = {
 				srcCats:true, 
-				trgCats:true
+				trgCats:true,
+				nextQCats:true
 			}
 			
 			function toggleVis(elmId, statusHandle){
@@ -349,19 +380,22 @@
 			
 			
 			/**
-			buils 2 similar lists of languages, one for source and one for target of translation 
+				populate languages in lanuages lists 
 			**/
 			function populateLanguagesListBox(languages){
-				var $list = $("#langList");
-				var $listTarget = $("#langListTarget");
-				$list.empty();
-				$listTarget.empty();
+				
+				lngLists= [$("#langList"),$("#langListTarget"),$("#langListNextQSrc"), $("#langListNextQTrg")]
+				for(i=0; i<lngLists.length; i++){
+					lngLists[i].empty();
+				}
+				
 				currentSelections.language = null;
 				currentSelections.languageTarget = null;
 				for(i = 0; i < languages.length; i++){
 					var newLelm = "<option value='" + languages[i].id + "'>" + languages[i].lang + "</option>";
-					$list.append(newLelm);
-					$listTarget.append(newLelm);
+					for(j=0; j <lngLists.length; j++){
+						lngLists[j].append(newLelm);
+					}
 				}
 				currentSelections.language = null;
 			}
@@ -602,6 +636,8 @@
 			{
 				populateCats(catsData, $("#fieldSetSrcCats"), INPUT_GRP_SRC_EXP);
 				populateCats(catsData, $("#fieldSetTrgCats"), INPUT_GRP_TRG_EXP);
+				populateCats(catsData, $("#fieldSetNextCats"), INPUT_TRP_NEXT_Q);
+
 			}
 			
 			function populateCats(catsData, domElmContainer, groupName){
@@ -771,6 +807,14 @@
 					toggleVis("divTrgCats", "trgCats");
 				}
 			);
+			
+			$("#btnVisibilityCatsNextQ").click(
+				function()
+				{
+					toggleVis("divNextQCats", "nextQCats");
+				}
+			);
+			
 			
 			
 			$("#btnBrowsFiles").on("click", function() {

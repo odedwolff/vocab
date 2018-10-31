@@ -797,7 +797,39 @@ def loadCatsId (catsArr):
 
 #serObj = json.dumps(obj)
 #json.loads(serObj)
+
+
+def nextQuestion(request):
+	log("entering nextQuestion()")
+	
+	user= request.POST["user"]
+	srcLang=request.POST["srcLang"]	
+	trgLang=request.POST["trgLang"]
+	catsStr=requests.POST["catsStr"]
 	
 	
 	
+	query = """
+	select *, fct*rnd as mul_fac from(
+		select exp.id as src_w_id, exp.expression as wrd, scr.id as scr_id, exp.frequency as frq,trg_exp.id as t_wrd_id, trg_exp.expression as t_wrd,
+			ifnull(((1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .95), 2))*grc + (0.5*(1-grc)))   * exp.frequency, 0.5)  as fct,
+			avg(rand()) as rnd,COUNT(trg_exp.id) as no_wrd, grc,
+			pow((scr.successcount/GREATEST(scr.attempts, 1) * .95), 2) as sccss_fct_dbg,
+            scr.attempts, scr.successCount
+		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
+		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
+		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id 
+		   left join (select LEAST(pow(0.13*scr1.attempts,4),1)as grc, scr1.id from  vocab_aggrscore scr1) as rt on rt.id=scr.id) 
+		where exp.language_id = {srcLngId} and exp.categories_ser={cats} and trg_exp.language_id={trgLngId} and (scr.id is Null or (scr.user_id = {userId} and scr.targetLanguage_id={trgLang}))
+		group by exp.id, trg_exp.language_id
+    )as tz order by mul_fac desc	
+	""".format(srcLngId=srcLang , cats=catsStr, trgLngId=trgLang,  userId=user)
+	
+	log("fommatted requeset= " + reqeust)
+	crs = connection.cursor()
+	crs.execute(q)
+	rs= crs.fetchall()
+	log("rs=" + str(rs))
+	return HttpResponse("implementation under construction")	
+
 	
