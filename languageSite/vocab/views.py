@@ -116,6 +116,14 @@ def uploadTranslationsBatch(request):
 		return HttpResponseServerError("expressions pair failed to save")	
 
 	
+
+def parseListOfInts(listOfInts):
+	out = []
+	for elm in listOfInts:
+		out.append(int(elm))
+	return out
+
+	
 def addExpressionFull(request):
 	"""
 	handles a request to add a translation pair between 2 given expressions 
@@ -125,16 +133,18 @@ def addExpressionFull(request):
 	*renmae to better represent this adds a translation rather than an expression 
 	*add details to failure message 
 	"""	
+	
 	exp1 = {}
 	exp1[KEY_LANG] = request.POST["languageID1"]
 	exp1[KEY_EXP_STR] = request.POST["expression1"]
 	exp1[KEY_FREQ]=request.POST["weight1"]
-	exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]")
+	#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]")
+	exp1[KEY_CATS_IDS]= parseListOfInts(request.POST.getlist("cats1[]"))
 	exp2 = {}
 	exp2[KEY_LANG] = request.POST["languageID2"]
 	exp2[KEY_EXP_STR] = request.POST["expression2"]
 	exp2[KEY_FREQ]=request.POST["weight2"]
-	exp2[KEY_CATS_IDS]= request.POST.getlist("cats2[]")
+	exp2[KEY_CATS_IDS]= parseListOfInts(request.POST.getlist("cats2[]"))
 	
 	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS, LANG_TYPE_INTS)
 	
@@ -799,14 +809,31 @@ def loadCatsId (catsArr):
 #json.loads(serObj)
 
 
+
+@csrf_exempt
 def nextQuestion(request):
 	log("entering nextQuestion()")
+	log("request =" + str(request.POST))
 	
-	user= request.POST["user"]
+	userId = None
+	if KEY_SESSION_LOGGED_USER in request.session:
+			userId = request.session[KEY_SESSION_LOGGED_USER]
+	if userId is None:
+		return HttpResponseServerError("the request requires a logged on user session")	 
+	
+	user=userId
 	srcLang=request.POST["srcLang"]	
 	trgLang=request.POST["trgLang"]
-	catsStr=requests.POST["catsStr"]
+	cats=request.POST.getlist("cats[]")
+	#parse from string representation of ints
+	catsParsedInts = parseListOfInts(cats)
+	catsParsedInts.sort()
+	catsStr=json.dumps(catsParsedInts)
 	
+	
+	
+	log("extracted args from request, (serLang={srcLng},trgLang={trgLng},Cats={cats}, catsStr= {ctsStr})".format(srcLng=srcLang, trgLng=trgLang, 
+		cats=str(cats), ctsStr= catsStr));
 	
 	
 	query = """
@@ -820,14 +847,15 @@ def nextQuestion(request):
 		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
 		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id 
 		   left join (select LEAST(pow(0.13*scr1.attempts,4),1)as grc, scr1.id from  vocab_aggrscore scr1) as rt on rt.id=scr.id) 
-		where exp.language_id = {srcLngId} and exp.categories_ser={cats} and trg_exp.language_id={trgLngId} and (scr.id is Null or (scr.user_id = {userId} and scr.targetLanguage_id={trgLang}))
+		where exp.language_id = {srcLngId} and exp.categories_ser='{cats}' and trg_exp.language_id='{trgLng}' and (scr.id is Null or (scr.user_id = '{userId}' and scr.targetLanguage_id='{trgLng}'))
 		group by exp.id, trg_exp.language_id
     )as tz order by mul_fac desc	
-	""".format(srcLngId=srcLang , cats=catsStr, trgLngId=trgLang,  userId=user)
+	""".format(srcLngId=srcLang , cats=catsStr, trgLng=trgLang,  userId=user)
+	#format(srcLngId=srcLang , cats=catsStr, trgLng=trgLang,  userId=user)
 	
-	log("fommatted requeset= " + reqeust)
+	log("fommatted querry= " + query)
 	crs = connection.cursor()
-	crs.execute(q)
+	crs.execute(query)
 	rs= crs.fetchall()
 	log("rs=" + str(rs))
 	return HttpResponse("implementation under construction")	

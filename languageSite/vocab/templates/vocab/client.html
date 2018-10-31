@@ -154,7 +154,7 @@
 				<button id="btnVisibilityCatsNextQ">+-</button>
 			</div>
 			<div id=divNextQCats>
-				<fieldset id="fieldSetNextCats">  
+				<fieldset id="fieldSetNextQCats">  
 				<legend>categories</legend>  
 					<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   						<br>  
 				</fieldset> 
@@ -209,7 +209,9 @@
 			var currentSelections = {
 				language:null, 
 				category: null,
-				languageTarget: null
+				languageTarget: null,
+				languageNextQSourcce:null, 
+				languageNextQTarget:null
 			}
 			
 			
@@ -636,7 +638,7 @@
 			{
 				populateCats(catsData, $("#fieldSetSrcCats"), INPUT_GRP_SRC_EXP);
 				populateCats(catsData, $("#fieldSetTrgCats"), INPUT_GRP_TRG_EXP);
-				populateCats(catsData, $("#fieldSetNextCats"), INPUT_TRP_NEXT_Q);
+				populateCats(catsData, $("#fieldSetNextQCats"), INPUT_TRP_NEXT_Q);
 
 			}
 			
@@ -666,7 +668,8 @@
 					{
 						val = checkboxes[i].value;  
 						console.log("checked cat:" + val);
-						listOut.push(val);
+						listOut.push(parseInt(val));
+						//listOut.push(val);
 					}		
 				} 
 				return listOut;
@@ -752,6 +755,44 @@
 				});
 			
 			}
+			
+			function sendNextQReuest(){
+				console.log("entering sendNextQReuest()")
+				url = HOST + '/vocab/next-question';
+				cats = listSelectedCats("inputGroupNextQ");
+				
+				if (currentSelections.languageNextQSourcce == null ||
+					currentSelections.languageNextQTarget == null){
+						alert("please make sure source and target languages are selected");
+						return;
+					}
+				
+				if (cats==null){
+					cats==[];
+				}
+				
+				var post_data = {
+					'srcLang': currentSelections.languageNextQSourcce  ,
+					'trgLang': currentSelections.languageNextQTarget  ,
+					'cats': cats 
+				}
+				
+				$.ajax({
+				  url: url,
+				  type:'POST',
+				  data:post_data,
+				  
+				  success:function(data){
+					debugQuick(data);
+				  },
+				  
+				  error:function(error){
+					debugQuick(error.responseText);
+				  }
+				});
+				
+				
+			}	
 
 			
 		
@@ -791,6 +832,15 @@
 			$("#btnTest").click(
 				testSendObjects
 			);
+			
+			$("#btnNextQ").click(
+				sendNextQReuest
+			);
+			
+			
+			
+			
+			
 			
 			
 			
@@ -862,6 +912,27 @@
 					currentSelections.languageTarget = selectedLanguageID;
 				}
 			);
+			
+			
+			$("#divLangListNextQSrc").change(
+				function(){
+					//var selectedLanguageID = $(this).find('option:selected').text();
+					var selectedLanguageID = $(this).find('option:selected').val();
+					currentSelections.languageNextQSourcce = selectedLanguageID;
+				}
+			);
+			
+			
+			$("#langListNextQTrg").change(
+				function(){
+					//var selectedLanguageID = $(this).find('option:selected').text();
+					var selectedLanguageID = $(this).find('option:selected').val();
+					currentSelections.languageNextQTarget = selectedLanguageID;
+				}
+			);
+			
+			
+			
 			
 			
 			$("#submitExpression").click(submitExpression);
