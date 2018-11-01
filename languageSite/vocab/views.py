@@ -825,11 +825,13 @@ def nextQuestion(request):
 	srcLang=request.POST["srcLang"]	
 	trgLang=request.POST["trgLang"]
 	cats=request.POST.getlist("cats[]")
-	#parse from string representation of ints
-	catsParsedInts = parseListOfInts(cats)
-	catsParsedInts.sort()
-	catsStr=json.dumps(catsParsedInts)
-	
+	#if not empty 
+	if cats:
+		catsParsedInts = parseListOfInts(cats)
+		catsParsedInts.sort()
+		catsStr=json.dumps(catsParsedInts)
+	else:
+		catsStr ="" 
 	
 	
 	log("extracted args from request, (serLang={srcLng},trgLang={trgLng},Cats={cats}, catsStr= {ctsStr})".format(srcLng=srcLang, trgLng=trgLang, 
@@ -858,6 +860,17 @@ def nextQuestion(request):
 	crs.execute(query)
 	rs= crs.fetchall()
 	log("rs=" + str(rs))
-	return HttpResponse("implementation under construction")	
+	#if there is a match 
+	if len(rs[0]) > 0:
+		qExpId = rs[0][0]
+		qExpStr= rs[0][1]
+		nextQ = {"id":qExpId, "str":qExpStr}
+	else:
+		nextQ = None 
+	
+	#TODO- load translations! 
+	outData = {"nextQ":nextQ, "translations":"to be implemented"}
+	return JsonResponse(outData, safe=False)
+	#return HttpResponse("implementation under construction")	
 
 	
