@@ -781,11 +781,7 @@
 				  url: url,
 				  type:'POST',
 				  data:post_data,
-				  
-				  success:function(data){
-					debugQuick(data);
-				  },
-				  
+				  success:handleNextQResponse,
 				  error:function(error){
 					debugQuick(error.responseText);
 				  }
@@ -793,6 +789,14 @@
 				
 				
 			}	
+			
+			
+			
+			function handleNextQResponse(res){
+				console.log("NextQ Resoponse:");
+				console.log("(expression id, exp string) =" + res.nextQ.id + ","+res.nextQ.str);
+			}
+			
 
 			
 		

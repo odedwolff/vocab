@@ -833,10 +833,16 @@ def nextQuestion(request):
 	else:
 		catsStr ="" 
 	
-	
 	log("extracted args from request, (serLang={srcLng},trgLang={trgLng},Cats={cats}, catsStr= {ctsStr})".format(srcLng=srcLang, trgLng=trgLang, 
 		cats=str(cats), ctsStr= catsStr));
 	
+	
+	outData = getNextQFromDb(srcLang, trgLang, userId, catsStr)
+	return JsonResponse(outData, safe=False)
+	#return HttpResponse("implementation under construction")	
+
+	
+def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 	
 	query = """
 	select *, fct*rnd as mul_fac from(
@@ -852,7 +858,7 @@ def nextQuestion(request):
 		where exp.language_id = {srcLngId} and exp.categories_ser='{cats}' and trg_exp.language_id='{trgLng}' and (scr.id is Null or (scr.user_id = '{userId}' and scr.targetLanguage_id='{trgLng}'))
 		group by exp.id, trg_exp.language_id
     )as tz order by mul_fac desc	
-	""".format(srcLngId=srcLang , cats=catsStr, trgLng=trgLang,  userId=user)
+	""".format(srcLngId=srcLanguage , cats=catsSer, trgLng=trgLanguage,  userId=userId)
 	#format(srcLngId=srcLang , cats=catsStr, trgLng=trgLang,  userId=user)
 	
 	log("fommatted querry= " + query)
@@ -870,7 +876,5 @@ def nextQuestion(request):
 	
 	#TODO- load translations! 
 	outData = {"nextQ":nextQ, "translations":"to be implemented"}
-	return JsonResponse(outData, safe=False)
-	#return HttpResponse("implementation under construction")	
-
+	return outData
 	
