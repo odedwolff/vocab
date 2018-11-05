@@ -70,6 +70,7 @@ class AggrScore(models.Model):
 	
 
 	
+	
 """
 
 		

@@ -19,7 +19,9 @@ import pprint
 
 from django.views.decorators.csrf import csrf_exempt
 
-from django.db import connection	
+from django.db import connection
+
+	
 
 
 
@@ -842,39 +844,65 @@ def nextQuestion(request):
 	#return HttpResponse("implementation under construction")	
 
 	
+	
+	
+
+
 def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 	
-	query = """
-	select *, fct*rnd as mul_fac from(
-		select exp.id as src_w_id, exp.expression as wrd, scr.id as scr_id, exp.frequency as frq,trg_exp.id as t_wrd_id, trg_exp.expression as t_wrd,
-			ifnull(((1- pow((scr.successcount/GREATEST(scr.attempts, 1) * .95), 2))*grc + (0.5*(1-grc)))   * exp.frequency, 0.5)  as fct,
-			avg(rand()) as rnd,COUNT(trg_exp.id) as no_wrd, grc,
-			pow((scr.successcount/GREATEST(scr.attempts, 1) * .95), 2) as sccss_fct_dbg,
-            scr.attempts, scr.successCount
-		from ((( vocab_expression as exp left outer join vocab_aggrscore as scr on scr.expression_id = exp.id ) 
-		   inner join vocab_expression_translations as trx on trx.from_expression_id = exp.id) 
-		   inner join vocab_expression as trg_exp on trx.to_expression_id=trg_exp.id 
-		   left join (select LEAST(pow(0.13*scr1.attempts,4),1)as grc, scr1.id from  vocab_aggrscore scr1) as rt on rt.id=scr.id) 
-		where exp.language_id = {srcLngId} and exp.categories_ser='{cats}' and trg_exp.language_id='{trgLng}' and (scr.id is Null or (scr.user_id = '{userId}' and scr.targetLanguage_id='{trgLng}'))
-		group by exp.id, trg_exp.language_id
-    )as tz order by mul_fac desc	
-	""".format(srcLngId=srcLanguage , cats=catsSer, trgLng=trgLanguage,  userId=userId)
-	#format(srcLngId=srcLang , cats=catsStr, trgLng=trgLang,  userId=user)
 	
-	log("fommatted querry= " + query)
+	query = """
+		SELECT srcExp.id as word_id, srcExp.expression as word, srcExp.frequency as frq, 
+		scr.attempts as attempts, scr.successCount as correct 
+	FROM 
+		(vocab_expression as srcExp 
+		inner join vocab_expression_translations as trx on trx.from_expression_id=srcExp.id
+		inner join vocab_expression as trgExp on trx.to_expression_id=trgExp.id )
+		left outer join vocab_aggrscore as scr 
+		on (srcExp.id = scr.expression_id and scr.user_id = {userId} and scr.targetLanguage_id={trgLng})
+	WHERE 
+		srcExp.language_id={srcLngId} and srcExp.categories_ser='{cats}' and trgExp.language_id={trgLng} 
+	""".format(srcLngId=srcLanguage , cats=catsSer, trgLng=trgLanguage,  userId=userId)
+	
+	
+	log("formatted querry={q}".format(q=query))
+	
+	
 	crs = connection.cursor()
 	crs.execute(query)
 	rs= crs.fetchall()
-	log("rs=" + str(rs))
+	return rs
+	
+
+def testRandFrequency():
+	query= """
+	
+	select expr, freq, rnd, rnd*freq as rnd_freq  
+	from (
+		select exp.expression as expr, exp.frequency as freq, rand() as rnd
+		from vocab_expression as exp
+	) as drv 
+	order by rnd_freq desc
+	
+	"""
+	
+	crs = connection.cursor()
+	crs.execute(query)
+	rs= crs.fetchall()
+	#log("rs=" + str(rs))
 	#if there is a match 
-	if len(rs[0]) > 0:
-		qExpId = rs[0][0]
-		qExpStr= rs[0][1]
-		nextQ = {"id":qExpId, "str":qExpStr}
+	
+	if len(rs) > 0:
+		expr= rs[0][0]
+		freq= rs[0][1]
+		nextQ = { "str":expr, "frq":freq}
 	else:
 		nextQ = None 
 	
 	#TODO- load translations! 
-	outData = {"nextQ":nextQ, "translations":"to be implemented"}
+	outData = {"nextQ":nextQ}
+	
 	return outData
+	
+
 	
