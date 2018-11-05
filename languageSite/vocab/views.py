@@ -21,6 +21,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.db import connection
 
+import random
+
 	
 
 
@@ -39,9 +41,12 @@ CATS_TYPE_INTS = "compareInts"
 LANG_TYPE_STRING="compareString" 
 LANG_TYPE_INTS="compareIntes"
 
+pp = pprint.PrettyPrinter(indent=4)
+
+
 def log(msg, imortance = 0):
 	print(msg)
-
+	##pp.pprint(msg)
 
 def client (request):
 	"""
@@ -845,7 +850,7 @@ def nextQuestion(request):
 
 	
 	
-	
+
 
 
 def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
@@ -865,15 +870,99 @@ def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 	""".format(srcLngId=srcLanguage , cats=catsSer, trgLng=trgLanguage,  userId=userId)
 	
 	
-	log("formatted querry={q}".format(q=query))
+	#log("formatted querry={q}".format(q=query))
 	
 	
 	crs = connection.cursor()
 	crs.execute(query)
 	rs= crs.fetchall()
-	return rs
+	
+	prcdResults = []
+	i=0
+	totalFactor=0
+	while i<len(rs):
+		newElm={}
+		newElm['expId'] = rs[i][0]
+		newElm['expStr'] = rs[i][1]
+		newElm['expFreq'] = rs[i][2]
+		newElm['expAttempts'] = rs[i][3]
+		newElm['expCorrect'] = rs[i][4]
+		factor=calcFactor(newElm, newElm['expFreq'])
+		newElm['factor']=factor
+		totalFactor+=factor
+		prcdResults.append(newElm)
+		i+=1
+	#log("processed results=" + str(prcdResults))
+	#log("processed results=" + toStrProcessedNextQ(prcdResults))
+	 
+	elm = chooseRandomWeighted(prcdResults, totalFactor)
+	return elm
+
+
+def chooseRandomWeighted(prcdResults, sumOfFactors):
+	#this structure should allocate each candidate word a sub section of [0,1]
+	#then a unified random variable will select the word to which its value belong
+	spectrum=[]
+	upperLimit = 0
+	for wordInfo in prcdResults:
+		upperLimit+= wordInfo['factor'] / sumOfFactors
+		spectrum.append({'upperLimit':upperLimit, 'wordInfo':wordInfo})
+	
+	rnd= random.random()
+	lowerLimit = 0 
+	i=0
+	
+	#log("spectrum=" + str(spectrum))
+	while i<len(spectrum):
+		upperLimit = spectrum[i]['upperLimit']
+		if rnd>lowerLimit and rnd <= upperLimit:
+			return spectrum[i]['wordInfo']
+		lowerLimit=upperLimit
+		i+=1
+	log("RUNTIME ERROR, spectrum search out of rang !!")
+
 	
 
+def toStrProcessedNextQ(elmList):
+	out="[\n"
+	for elm in elmList:
+		out += str(elm) 
+		out += "\n"
+	out+="]"
+	return out 
+	
+	
+
+#default score to be used as if proper score records does not exist, also factored in with score record, 
+#where the number of attempts is still low 	
+DEFAULT_HISTORY_FACTOR = 0.5
+#the number of attempts after which the history record is fully considered (until then it is considered partially)
+MAX_VALUE_FADE_IN = 8
+
+
+#calculaates the total propbability factor of an expression to be chosen. the higher the value, the higher 
+#the chances to get elected (ideally, a constant ration between this value and chances to get elected 
+#should be aimed at) 
+def calcFactor(elm, freq):
+	historyFactor = computeHistoryFactor(elm)
+	return historyFactor*freq
+	
+
+#calculates the total factor based on proper history record (or lack thereof)
+def computeHistoryFactor(elm):
+	if not elm['expAttempts']:
+		return DEFAULT_HISTORY_FACTOR
+	fadeInFactor = computeFadeInFactor(elm['expAttempts'])
+	return (1.0 - fadeInFactor) * DEFAULT_HISTORY_FACTOR + (fadeInFactor) * elm['expCorrect']/elm['expAttempts']
+	
+#should fade away in [0,inf], 0->0, MAX_VALUE_FADE_IN > -> 1 , in between gently climb 
+def computeFadeInFactor(attempts):
+	if attempts >=MAX_VALUE_FADE_IN:
+		return 1.0
+	return attempts/MAX_VALUE_FADE_IN
+	
+	
+	
 def testRandFrequency():
 	query= """
 	
