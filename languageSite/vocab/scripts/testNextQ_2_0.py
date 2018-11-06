@@ -7,7 +7,7 @@ def run():
 	
 	test1()
 	
-iterations=1000
+iterations=1
 def test1():
 	stat = {}
 	for i in range(0,iterations):
