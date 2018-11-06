@@ -953,7 +953,7 @@ def computeHistoryFactor(elm):
 	if not elm['expAttempts']:
 		return DEFAULT_HISTORY_FACTOR
 	fadeInFactor = computeFadeInFactor(elm['expAttempts'])
-	return (1.0 - fadeInFactor) * DEFAULT_HISTORY_FACTOR + (fadeInFactor) * elm['expCorrect']/elm['expAttempts']
+	return (1.0 - fadeInFactor) * DEFAULT_HISTORY_FACTOR + (fadeInFactor) * (1 - 0.95*elm['expCorrect']/elm['expAttempts'])
 	
 #should fade away in [0,inf], 0->0, MAX_VALUE_FADE_IN > -> 1 , in between gently climb 
 def computeFadeInFactor(attempts):
