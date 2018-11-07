@@ -893,7 +893,7 @@ def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 		prcdResults.append(newElm)
 		i+=1
 	#log("processed results=" + str(prcdResults))
-	log("processed results=" + toStrProcessedNextQ(prcdResults))
+	#log("processed results=" + toStrProcessedNextQ(prcdResults))
 	 
 	elm = chooseRandomWeighted(prcdResults, totalFactor)
 	return elm
@@ -998,12 +998,18 @@ def testRandFrequency():
 	
 	
 
-
+@csrf_exempt
 def handleAnswer(request):
-	userId=requeat.POST["userId"]
-	srcExpIdd=requeat.POST["srcExpIdd"]
-	targetLangd=requeat.POST["targetLangd"] 
-	correctd=requeat.POST["correctd"]
+	log("entering handleAnswer(), requeset=" + str(request.POST))
+	log("DEBUG- type of correct values= " + str(type(request.POST["correct"] )))
+	
+	
+	userId=request.session[KEY_SESSION_LOGGED_USER]
+	if not userId:
+		return HttpResponseServerError("request cannot be proccessed without logged on user")
+	srcExpId=request.POST["srcExpId"]
+	targetLang=request.POST["targetLang"] 
+	correct= request.POST["correct"] == '1'
 	answerUpdateDb(userId, srcExpId, targetLang, correct)
 	return HttpResponse("score updated")
 
@@ -1016,7 +1022,10 @@ def answerUpdateDb(userId, srcExpId, targetLang, correct):
 	if correct:
 			inc=1
 	if not rs:
-		score=AggrerScore()
+		score=AggrScore()
+		score.user_id=userId
+		score.expression_id=srcExpId
+		score.targetLanguage_id=targetLang
 		score.attempts=1
 		score.successCount=inc
 		score.attempts=1

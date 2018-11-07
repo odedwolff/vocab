@@ -148,31 +148,58 @@
 		
 		
 		
-		<div id=divNextQ class="panel1" >
-			<button id=btnNextQ>next question</button>
-			<div>
-				<button id="btnVisibilityCatsNextQ">+-</button>
+		
+		
+		
+		<div id=divQandA class="panel1" >
+			<div id=divQuestion>
+				<div id=divNextQ class="panel1" >
+					<button id=btnNextQ>next question</button>
+					<div>
+						<button id="btnVisibilityCatsNextQ">+-</button>
+					</div>
+					<div id=divNextQCats>
+						<fieldset id="fieldSetNextQCats">  
+						<legend>categories</legend>  
+							<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   						<br>  
+						</fieldset> 
+					</div>
+					<div id="divLangListNextQSrc">
+						language source 
+						<select name="languagesNextQSrc" id="langListNextQSrc">
+							
+						</select>
+					</div>
+					<div id="divLangListNextQTrg">
+						language target
+						<select name="languagesNextQTrg" id="langListNextQTrg">
+							
+						</select>
+					</div>
+				</div>
+				<textarea id=textQuestion rows="1" cols="50" readonly></textarea>
+				
 			</div>
-			<div id=divNextQCats>
-				<fieldset id="fieldSetNextQCats">  
-				<legend>categories</legend>  
-					<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   						<br>  
-				</fieldset> 
+			<!--TODO- consider multiple answers/translations (maybe change 
+			height dynamically?)-->
+			<!--<button id=btnLoadNextQuesiton>load next question</button> -->
+			<button id=btnShowAnswer>show answer</button>
+			<div id=divAnswer>
+				<textarea id=textAnswer rows="4" cols="50" readonly>answer place holder</textarea>
+				<div id="wrapper">
+					<label for="answer_radio">Did you know any of the answers?</label>
+					<p>
+						<input type="radio" name="correct_answer" value=1 checked>Yes</input>
+					</p>
+					<p>
+						<input type="radio" name="correct_answer" value=0>No</input>
+					</p>
+				</div>
 			</div>
-			<div id="divLangListNextQSrc">
-				language source 
-				<select name="languagesNextQSrc" id="langListNextQSrc">
-					
-				</select>
-			</div>
-			<div id="divLangListNextQTrg">
-				language target
-				<select name="languagesNextQTrg" id="langListNextQTrg">
-					
-				</select>
-			</div>
-			
+			<button id=btnSendCorrct>send</button>	
 		</div>
+		
+		
 		
 		
 		<div id=divTest class="panel1" >
@@ -198,7 +225,7 @@
 			
 			
 			
-			
+			var loggedOnUserName=null;
 			
 			
 			var loadedLists = {
@@ -212,6 +239,11 @@
 				languageTarget: null,
 				languageNextQSourcce:null, 
 				languageNextQTarget:null
+			}
+			
+			var currentQuestion = {
+				expId:null,
+				targetLanguage:null
 			}
 			
 			
@@ -242,6 +274,9 @@
 					visStatus[statusHandle] = true;
 				}
 			}
+			
+			
+			
 			
 			
 			/**
@@ -340,6 +375,7 @@
 					debugQuick(data);
 					if(data.success){
 						setPanelLoggedOn(userName);
+						loggedOnUserName=username;
 					}else{
 						alert("log in failed");
 						setPanelLoggedOff();
@@ -542,6 +578,7 @@
 					debugQuick(data);
 					if(data.isLogged){
 						setPanelLoggedOn(data.username);
+						loggedOnUserName=data.username;
 					}else{
 						setPanelLoggedOff();
 					}
@@ -565,6 +602,7 @@
 				  success:function(data){
 					debugQuick(data);
 					setPanelLoggedOff();
+					loggedOnUserName=null;
 				  },
 				  error:function(error){
 					debugQuick(error.responseText);
@@ -777,6 +815,7 @@
 					'cats': cats 
 				}
 				
+				
 				$.ajax({
 				  url: url,
 				  type:'POST',
@@ -787,16 +826,65 @@
 				  }
 				});
 				
-				
+				currentQuestion.targetLanguage=currentSelections.languageNextQTarget
 			}	
 			
 			
 			
 			function handleNextQResponse(res){
 				console.log("NextQ Resoponse:");
-				console.log("(expression id, exp string) =" + res.nextQ.id + ","+res.nextQ.str);
+				console.log("(expression id, exp string) =" + res.expStr + ","+res.expId);
+				$("#textQuestion").val(res.expStr)
+				currentQuestion.expId=res.expId;
 			}
 			
+			
+			
+			function sendUpdateCorrect(){
+				//correctFlg = $("input:radio[name ='managerelradio']:checked").val() == 1;
+				correctNum=$("input:radio[name ='correct_answer']:checked").val();
+				console.log("selecte val from radio=" + correctNum)
+				
+				postData={
+					srcExpId:currentQuestion.expId,
+					targetLang:currentQuestion.targetLanguage,
+					correct: correctNum
+				}
+				
+				$.ajax({
+				  url: HOST + '/vocab/handle-answer',
+				  
+				  type:'POST',
+				  data:postData,
+				  success:function(data){
+					//console.log(data);
+					debugQuick(data);
+					
+				  },
+				  error:function(error){
+					//console.log(error);
+					debugQuick(error.responseText);
+				  }
+				});
+			}
+			
+			
+			
+			/*
+			function loadNextQuestion(){
+				data={
+					'srcLang':currentSelections.language,
+					'trgLang':currentSelections.languageNextQTarget,
+					'cats': listSelectedCats
+				} 
+			}
+			*/
+			
+			/*
+			srcLang=request.POST["srcLang"]	
+					trgLang=request.POST["trgLang"]
+					cats=request.POST.getlist("cats[]")
+			*/
 
 			
 		
@@ -891,16 +979,6 @@
 			
 			
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 			$("#langList").change(
 				function(){
 					//var selectedLanguageID = $(this).find('option:selected').text();
@@ -936,7 +1014,7 @@
 			);
 			
 			
-			
+				
 			
 			
 			$("#submitExpression").click(submitExpression);
@@ -944,6 +1022,10 @@
 			//$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
 			$("#btnLoggedInUserInfo").click(obtainLogOnInfo);
 			$("#btnLogOn").click(sendLogOn);
+			$("#textAnswer").hide();
+			$("#btnShowAnswer").click(function(){$("#textAnswer").show();});
+			$("#btnSendCorrct").click(sendUpdateCorrect);
+
 			
 			
 			//when page first opens, get the logged on info from server 
