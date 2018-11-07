@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from django.http import JsonResponse
 
-from .models import Expression, Language, User, Catagory
+from .models import Expression, Language, User, Catagory, AggrScore
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -995,5 +995,55 @@ def testRandFrequency():
 	
 	return outData
 	
+	
+	
 
+
+def handleAnswer(request):
+	userId=requeat.POST["userId"]
+	srcExpIdd=requeat.POST["srcExpIdd"]
+	targetLangd=requeat.POST["targetLangd"] 
+	correctd=requeat.POST["correctd"]
+	answerUpdateDb(userId, srcExpId, targetLang, correct)
+	return HttpResponse("score updated")
+
+	
+def answerUpdateDb(userId, srcExpId, targetLang, correct):
+	rs = AggrScore.objects.filter(user_id = userId, expression_id = srcExpId, targetLanguage_id = targetLang)
+	score = None
+	inc=0
+	#no record for this (expression,targetLang,User) yet, this is the first one
+	if correct:
+			inc=1
+	if not rs:
+		score=AggrerScore()
+		score.attempts=1
+		score.successCount=inc
+		score.attempts=1
+	else:
+		score=rs[0]
+		score.successCount+=inc
+		score.attempts+=1
+	log("saving updated score obj:" + str(score))
+	score.save()
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	

@@ -2,13 +2,10 @@ from vocab.views import *
 
 
 def run():
-	#rs =getNextQFromDb(2, 5, 31, "")
-	#log("recieved results at test scrtipt:" + str(rs))
-	
-	test1()
+	testUpdateAnswer()
 	
 iterations=1
-def test1():
+def testNextQStat():
 	stat = {}
 	for i in range(0,iterations):
 		rs =getNextQFromDb(2, 5, 31, "")
@@ -20,3 +17,6 @@ def test1():
 			stat[key]=1
 	
 	print("stat=" + str(stat))
+	
+def testUpdateAnswer():
+	answerUpdateDb(31, 326, 5, True)

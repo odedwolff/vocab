@@ -17,7 +17,7 @@ urlpatterns = [
 	path('load-cats', views.handleReqLoadCategories, name='loadCats'),
 	path('upload-translations-batch', views.uploadTranslationsBatch, name='uploadTrxBatch'), 
 	path('test-read-objects', views.testReadObjects, name='testReadObjects'),
-	path('next-question', views.nextQuestion, name='nextQuestion')
-
+	path('next-question', views.nextQuestion, name='nextQuestion'),
+	path('handle-answer', views.handleAnswer, name='handleAnswer')
 	
 ]
