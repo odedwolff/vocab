@@ -836,6 +836,7 @@
 				console.log("(expression id, exp string) =" + res.expStr + ","+res.expId);
 				$("#textQuestion").val(res.expStr)
 				currentQuestion.expId=res.expId;
+				sendLoadTranslations();
 			}
 			
 			
@@ -866,6 +867,33 @@
 					debugQuick(error.responseText);
 				  }
 				});
+			}
+			
+			
+			function sendLoadTranslations(){
+				debugQuick("sending reqest for translations")
+				postData= 
+				{
+					expId: currentQuestion.expId, 
+					trgLang: currentQuestion.targetLanguage
+				}
+				$.ajax({
+				  url: HOST + '/vocab/load-translations',
+				  
+				  type:'POST',
+				  data:postData,
+				  success:handleTrxResponse,
+				  error:function(error){
+					//console.log(error);
+					debugQuick(error.responseText);
+				  }
+				});
+			
+			}
+			
+			function handleTrxResponse(data){
+				$("#textAnswer").val(data);
+				debugQuick(data);
 			}
 			
 			

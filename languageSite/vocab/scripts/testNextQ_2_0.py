@@ -2,7 +2,7 @@ from vocab.views import *
 
 
 def run():
-	testUpdateAnswer()
+	testLoadTranslations()
 	
 iterations=1
 def testNextQStat():
@@ -20,3 +20,6 @@ def testNextQStat():
 	
 def testUpdateAnswer():
 	answerUpdateDb(31, 326, 5, True)
+	
+def testLoadTranslations():
+	loadTranslations(326, 5)

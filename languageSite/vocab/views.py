@@ -1036,11 +1036,29 @@ def answerUpdateDb(userId, srcExpId, targetLang, correct):
 	log("saving updated score obj:" + str(score))
 	score.save()
 	
+
+@csrf_exempt
+def handLoadTranslations(request):
+	rs= loadTranslations(request.POST['expId'], request.POST['trgLang'])
+	return JsonResponse(rs, safe=False)
+
+def loadTranslations(expId, trgLng):
+	q = """
+		SELECT  
+		trgExp.id, trgExp.expression
+	FROM 
+		vocab_expression_translations as trx
+		join vocab_expression as srcExp on trx.from_expression_id=srcExp.id
+		join vocab_expression as trgExp on trx.to_expression_id=trgExp.id
+	WHERE 
+		srcExp.id={srcExpI} and trgExp.language_id={lngId}
+	""".format(srcExpI=expId, lngId=trgLng)
 	
-	
-	
-	
-	
+	crs = connection.cursor()
+	crs.execute(q)
+	rs= crs.fetchall()
+	log("DEBUG-- rs=" + str(rs))
+	return rs
 	
 	
 	
