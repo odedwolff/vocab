@@ -2,9 +2,11 @@ from vocab.views import *
 
 
 def run():
-	testLoadTranslations()
-	
-iterations=1
+	#testLoadTranslations()
+	#answerUpdateDb(31, 326, 5, True)
+	testNextQStat()
+
+iterations=100
 def testNextQStat():
 	stat = {}
 	for i in range(0,iterations):

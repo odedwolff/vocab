@@ -867,6 +867,8 @@ def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 		on (srcExp.id = scr.expression_id and scr.user_id = {userId} and scr.targetLanguage_id={trgLng})
 	WHERE 
 		srcExp.language_id={srcLngId} and srcExp.categories_ser='{cats}' and trgExp.language_id={trgLng} 
+	GROUP BY
+		srcExp.id
 	""".format(srcLngId=srcLanguage , cats=catsSer, trgLng=trgLanguage,  userId=userId)
 	
 	
