@@ -853,7 +853,7 @@ def nextQuestion(request):
 #if the last char is a ']' - trim it 	
 def trimSerCat(catsSer):
 	if len(catsSer) > 0 and catsSer [-1] == ']':
-		return catsSer[0,-1]
+		return catsSer[0:-1]
 	return catsSer
 
 
