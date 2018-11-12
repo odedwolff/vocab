@@ -832,6 +832,10 @@
 			
 			
 			function handleNextQResponse(res){
+				if(res == null){
+					$("#textQuestion").val("no matching words for selected search parameters")
+					return;
+				}
 				console.log("NextQ Resoponse:");
 				console.log("(expression id, exp string) =" + res.expStr + ","+res.expId);
 				$("#textQuestion").val(res.expStr)
