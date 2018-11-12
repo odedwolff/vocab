@@ -849,14 +849,17 @@ def nextQuestion(request):
 	#return HttpResponse("implementation under construction")	
 
 	
-	
 
+#if the last char is a ']' - trim it 	
+def trimSerCat(catsSer):
+	if len(catsSer) > 0 and catsSer [-1] == ']':
+		return catsSer[0,-1]
+	return catsSer
 
 
 def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 	
-	
-	query = """
+	""" this query is wrong because it the equality on the cats string should be changed to 'starts with'
 		SELECT srcExp.id as word_id, srcExp.expression as word, srcExp.frequency as frq, 
 		scr.attempts as attempts, scr.successCount as correct 
 	FROM 
@@ -870,6 +873,24 @@ def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 	GROUP BY
 		srcExp.id
 	""".format(srcLngId=srcLanguage , cats=catsSer, trgLng=trgLanguage,  userId=userId)
+	
+	
+	catsSer=trimSerCat(catsSer)
+	
+	query = """
+		SELECT srcExp.id as word_id, srcExp.expression as word, srcExp.frequency as frq, 
+		scr.attempts as attempts, scr.successCount as correct 
+	FROM 
+		(vocab_expression as srcExp 
+		inner join vocab_expression_translations as trx on trx.from_expression_id=srcExp.id
+		inner join vocab_expression as trgExp on trx.to_expression_id=trgExp.id )
+		left outer join vocab_aggrscore as scr 
+		on (srcExp.id = scr.expression_id and scr.user_id = {userId} and scr.targetLanguage_id={trgLng})
+	WHERE 
+		srcExp.language_id={srcLngId} and srcExp.categories_ser like '{cats}' and trgExp.language_id={trgLng} 
+	GROUP BY
+		srcExp.id
+	""".format(srcLngId=srcLanguage , cats=catsSer + '%', trgLng=trgLanguage,  userId=userId)
 	
 	
 	#log("formatted querry={q}".format(q=query))
