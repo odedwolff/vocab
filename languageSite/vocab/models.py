@@ -23,9 +23,13 @@ class Language(models.Model):
 	
 	def __str__(self):
 		return self.language
-	
+
+#I know it is misspelled but im afraid refactoring could cause me a nervous breakdown		
 class Catagory(models.Model):
 	category = models.CharField(max_length=200, unique=True)
+	owner= models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+	is_public=models.BooleanField(default=0)
+	
 	
 	def __str__(self):
 		return self.category
