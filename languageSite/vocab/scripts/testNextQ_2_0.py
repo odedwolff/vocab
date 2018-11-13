@@ -6,7 +6,7 @@ def run():
 	#answerUpdateDb(31, 326, 5, True)
 	testNextQStat()
 
-iterations=100
+iterations=1
 def testNextQStat():
 	stat = {}
 	for i in range(0,iterations):

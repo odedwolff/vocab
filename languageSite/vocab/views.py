@@ -901,7 +901,7 @@ def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 		prcdResults.append(newElm)
 		i+=1
 	#log("processed results=" + str(prcdResults))
-	#log("processed results=" + toStrProcessedNextQ(prcdResults))
+	log("processed results=" + toStrProcessedNextQ(prcdResults))
 	 
 	elm = chooseRandomWeighted(prcdResults, totalFactor)
 	return elm
@@ -945,7 +945,8 @@ def toStrProcessedNextQ(elmList):
 #where the number of attempts is still low 	
 #this value can be thought of as the ratio of correct answers to attempts that will give a similar factor 
 #(so a 4/8 ratio should result similar factor to a default of  0.5 )
-DEFAULT_HISTORY_FACTOR = 0.5
+#DEFAULT_HISTORY_FACTOR = 0.5
+DEFAULT_HISTORY_FACTOR =2/1
 #the number of attempts after which the history record is fully considered (until then it is considered partially)
 MAX_VALUE_FADE_IN = 8
 
@@ -961,9 +962,13 @@ def calcFactor(elm, freq):
 #calculates the total factor based on proper history record (or lack thereof)
 def computeHistoryFactor(elm):
 	if not elm['expAttempts']:
-		return 1-DEFAULT_HISTORY_FACTOR
+		#return 1-DEFAULT_HISTORY_FACTOR
+		return DEFAULT_HISTORY_FACTOR
 	fadeInFactor = computeFadeInFactor(elm['expAttempts'])
-	return (1.0 - fadeInFactor) * (1 - DEFAULT_HISTORY_FACTOR) + (fadeInFactor) * (1 - 0.95*elm['expCorrect']/elm['expAttempts'])
+	#log("fade in factor=" + str(fadeInFactor))
+	#return (1.0 - fadeInFactor) * (1 - DEFAULT_HISTORY_FACTOR) + (fadeInFactor) * (1 - 0.95*elm['expCorrect']/elm['expAttempts'])
+	return (1.0 - fadeInFactor) * (DEFAULT_HISTORY_FACTOR) + (fadeInFactor) * (elm['expAttempts']/(elm['expCorrect'] + 1))
+
 	
 #should fade away in [0,inf], 0->0, MAX_VALUE_FADE_IN > -> 1 , in between gently climb 
 def computeFadeInFactor(attempts):
