@@ -674,17 +674,22 @@
 			
 			function handleLoadedCats(catsData)
 			{
+				/*
 				populateCats(catsData, $("#fieldSetSrcCats"), INPUT_GRP_SRC_EXP);
 				populateCats(catsData, $("#fieldSetTrgCats"), INPUT_GRP_TRG_EXP);
 				populateCats(catsData, $("#fieldSetNextQCats"), INPUT_TRP_NEXT_Q);
+				*/
+				populateCats(catsData.catListUser, $("#fieldSetSrcCats"), INPUT_GRP_SRC_EXP);
+				populateCats(catsData.catListUser, $("#fieldSetTrgCats"), INPUT_GRP_TRG_EXP);
+				populateCats(catsData.loadedCatsAll, $("#fieldSetNextQCats"), INPUT_TRP_NEXT_Q);
+				
 
 			}
 			
 			function populateCats(catsData, domElmContainer, groupName){
-			//id = newExpressionText
-			//<input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> 
 				var catStr, catId, newDomElmStr
-				catsList = catsData.loadedCats;
+				//catsList = catsData.loadedCats;
+				catsList = catsData;
 				$(domElmContainer).empty();
 				for(var i = 0; i < catsList.length; i++)
 				{

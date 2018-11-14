@@ -98,6 +98,12 @@ def uploadTranslationsBatch(request):
 	parsed = json.loads(request.body) 
 	log("parsed = " + str(parsed))
 	
+	if KEY_SESSION_LOGGED_USER in request.session:
+			thisUser = request.session[KEY_SESSION_LOGGED_USER]
+	else:
+		return HttpResponseServerError("ERROR- action requires a logged on user")
+	
+	
 	pairsArr = parsed["transInfo"]["wordpairs"]
 	saved=False
 	log("length of pairsArr=" + str(len(pairsArr)))
@@ -116,7 +122,7 @@ def uploadTranslationsBatch(request):
 			exp2[KEY_CATS_STRS] =  wordsPair["trgWord"]["categories"]
 		#handle categories! 
 		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
-		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING)
+		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING, thisUser)
 	if saved:
 		return HttpResponse("expressions pair saved")	
 	else:
@@ -140,6 +146,11 @@ def addExpressionFull(request):
 	*renmae to better represent this adds a translation rather than an expression 
 	*add details to failure message 
 	"""	
+	if KEY_SESSION_LOGGED_USER in request.session:
+			thisUser = request.session[KEY_SESSION_LOGGED_USER]
+	else:
+		return HttpResponseServerError("ERROR- action requires a logged on user")
+	
 	
 	exp1 = {}
 	exp1[KEY_LANG] = request.POST["languageID1"]
@@ -153,7 +164,7 @@ def addExpressionFull(request):
 	exp2[KEY_FREQ]=request.POST["weight2"]
 	exp2[KEY_CATS_IDS]= parseListOfInts(request.POST.getlist("cats2[]"))
 	
-	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS, LANG_TYPE_INTS)
+	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS, LANG_TYPE_INTS, thisUser)
 	
 	if saved:
 		return HttpResponse("expressions pair saved")	
@@ -375,7 +386,7 @@ def compareCategories(list1, list2):
 			return False
 	return True
 	
-def loadCategoriesFromDB():
+def loadCategoriesFromDBOld():
 	"""
 	loads all categories from database
 	"""
@@ -391,11 +402,38 @@ def loadCategoriesFromDB():
 		
 	return result
 	
+def loadCategoriesFromDB(thisUserId):
+	"""
+	loads all categories from database
+	"""
+	loadedCats = Catagory.objects.all()
+	catListAll = []
+	catListUser = []
+	#convert to an array of strings, so it can be serielized by Json handler
+	for cat in loadedCats:
+		tmpElm = {}
+		tmpElm["cat"] = cat.category
+		tmpElm["id"] = cat.id
+		catListAll.append(tmpElm)
+		if cat.is_public or (thisUserId and cat.owner_id == thisUserId):
+			catListUser.append(tmpElm)
+	
+	result = {"loadedCatsAll": catListAll, "catListUser":catListUser}
+	return result
+	
+	
+
+	
 def handleReqLoadCategories(request):
 	"""
 	handles a request to load all categories by loading all categories and sending them back in reply 
 	"""
-	loadedList = loadCategoriesFromDB()
+	
+	userId=None 
+	if KEY_SESSION_LOGGED_USER in request.session:
+		userId = request.session[KEY_SESSION_LOGGED_USER]
+		
+	loadedList = loadCategoriesFromDB(userId)
 	return JsonResponse(loadedList, safe=False)
 	
 
@@ -432,7 +470,7 @@ def handleRequestNextQuestion(request):
 	
 
 	
-def saveTrxPair(exp1, exp2, catsType, langType):
+def saveTrxPair(exp1, exp2, catsType, langType, thisUser):
 
 	"""
 	saves to database new expressions translation pair 
@@ -467,14 +505,16 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 	if langType is LANG_TYPE_INTS:
 		lang1Set = Language.objects.filter(id=exp1[KEY_LANG])
 		if len(lang1Set) is 0:
-			log("could not load language with id " + exp1[KEY_LANG])
-			return False
+			msg="could not load language with id " + exp1[KEY_LANG]
+			log(msg)
+			return (False, msg)
 		else:
 			lang1=lang1Set[0] 
 		lang1Set = Language.objects.filter(id=exp2[KEY_LANG])
 		if len(lang1Set) is 0:
-			log("could not load language with id " + exp2[KEY_LANG])
-			return False
+			msg="could not load language with id " + exp2[KEY_LANG]
+			log(msg)
+			return (False, msg)
 		else:
 			lang2=lang1Set[0] 
 			
@@ -497,21 +537,42 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 			lang2=lang1Set[0] 
 	
 	
+	
+	def catOwnedOrPublic(cat, user):
+		return cat.is_public or cat.ownerr == user
+	
+	
 	#check whether any of the categories is new. if so, create it in database. 
 	#creating newe categories this way only possible when cats are given as strings 
+	
+	#cats given as id are assumed to be 
+	#existing in database
+	#belong to current user, or public. the client should take care of that, by only 
+	#aloowing such cats to be selected. this could be considered a weaknes in architecture. 
+	#cats given as straing are either new, in whhich case there is not really a problem of 
+	#private access/ownership, or they are loaded at this point, bellow, then we can 
+	#check proper private access/ownership 
+	
 	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp1:
 		sentCats = exp1[KEY_CATS_STRS]
 		for cat in sentCats:
 			q = Catagory.objects.filter(category=cat)
+			#category is new
 			if len(q) is 0:
 				Catagory(category=cat).save()
+			else:
+				if not catOwnedOrPublic(cat, thisUser):
+					return (False, "Error-all catgories must be owned by user or public")
 	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp2:
 		sentCats = exp2[KEY_CATS_STRS]
 		for cat in sentCats:
 			q = Catagory.objects.filter(category=cat)
+			#category is new
 			if len(q) is 0:
 				Catagory(category=cat).save()
-		
+			else:
+				if not catOwnedOrPublic(cat, thisUser):
+					return (False, "Error-all catgories must be owned by user or public")
 	
 	
 	
@@ -535,7 +596,6 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 	
 	log("cat1=" + str(cats1))
 	log("cat2=" + str(cats2))
-
 
 	
 	if cats1:
@@ -591,7 +651,7 @@ def saveTrxPair(exp1, exp2, catsType, langType):
 	persistnaceExp1.translations.add(persistnaceExp2)
 	persistnaceExp2.save()
 	persistnaceExp1.save()
-	return True 
+	return (True, "it's all good, man") 
 
 
 
@@ -883,6 +943,9 @@ def loadTranslations(expId, trgLng):
 	return rs
 	
 	
+#checks whether all cats are either public or owned by given user 
+#def checkThatCatsAreValidForWriting(cats, user):
+#	listClause = "("
 	
 	
 	
