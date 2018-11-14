@@ -345,14 +345,21 @@ def extractCatStrings  (cats):
 	
 
 def handleReqAddCat(request):
+	
 	newCat = request.POST["cat"]
-	saved = insertCategory(newCat)
+	isPublic = request.POST["isPublic"]
+	userId = None
+	if KEY_SESSION_LOGGED_USER in request.session:
+			userId = request.session[KEY_SESSION_LOGGED_USER]
+	if not userId:
+		return HttpResponseServerError("ERROR- action requires a logged in user")
+	saved = insertCategory(newCat, isPublic, userId)
 	if saved:
 		return HttpResponse("new category saved")
 	else:
 		return HttpResponseServerError("new catgory failed to save, did you try to save a duplicate value?")
 	
-def insertCategory(categroyName):
+def insertCategory(categroyName, isPublic, userId):
 	rs = Catagory.objects.filter(category=categroyName)
 	#duplicate
 	if rs:
@@ -360,6 +367,12 @@ def insertCategory(categroyName):
 		return False 
 	cat = Catagory()
 	cat.category = categroyName
+	cat.is_public = isPublic=='true'
+	users = User.objects.filter(id=userId)
+	if not users:
+		log("ERROR- failed to laod user")
+		return False
+	cat.owner=users[0] 
 	cat.save()
 	return True 
 	

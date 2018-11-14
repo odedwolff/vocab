@@ -50,8 +50,8 @@
 				add category: 
 				<input type="text" id="textInputcategories" />
 				<button id="submitInsertCategory">submit
-				
 				</button>
+				<input type="checkbox" id="checkBoxCatIdPrivate">private<br>
 			</div>
 			
 			<div id="load categories">
@@ -622,9 +622,13 @@
 					return;
 				}
 				
+				//checkBoxCatIdPrivate
+				isPrivate=$('#checkBoxCatIdPrivate').prop('checked')
+				
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
-					'cat': newCat
+					'cat': newCat, 
+					'isPublic':!isPrivate
 				}
 				
 				$.ajax({
