@@ -107,6 +107,9 @@ def uploadTranslationsBatch(request):
 	pairsArr = parsed["transInfo"]["wordpairs"]
 	saved=False
 	log("length of pairsArr=" + str(len(pairsArr)))
+	
+	allGood = True
+	errorMessages=[]
 	for wordsPair in pairsArr:
 		exp1 = {}
 		exp1[KEY_LANG] = parsed["transInfo"]["srcLang"]
@@ -120,14 +123,19 @@ def uploadTranslationsBatch(request):
 		exp2[KEY_FREQ]=wordsPair["trgWord"]["frequency"]
 		if "categories" in wordsPair["trgWord"]:
 			exp2[KEY_CATS_STRS] =  wordsPair["trgWord"]["categories"]
-		#handle categories! 
-		#exp1[KEY_CATS_IDS]= request.POST.getlist("cats1[]") 
-		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING, thisUser)
-	if saved:
-		return HttpResponse("expressions pair saved")	
+		errMsgContainer = {}
+		saved = saveTrxPair(exp1, exp2, CATS_TYPE_STRINGS, LANG_TYPE_STRING, thisUser,errMsgContainer)
+		if not saved:
+			allGood=False
+			errorMessages.append(errMsgContainer['message'])	
+	
+	rtMsg=""
+	if allGood:
+		rtMsg="all pairs saved successfully"
 	else:
-		return HttpResponseServerError("expressions pair failed to save")	
-
+		rtMsg="some of the the pairs not saved,see errors:" + str(errorMessages)
+		
+	return HttpResponse(rtMsg)
 	
 
 def parseListOfInts(listOfInts):
@@ -164,12 +172,13 @@ def addExpressionFull(request):
 	exp2[KEY_FREQ]=request.POST["weight2"]
 	exp2[KEY_CATS_IDS]= parseListOfInts(request.POST.getlist("cats2[]"))
 	
-	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS, LANG_TYPE_INTS, thisUser)
+	errMsgContainer = {}
+	saved = saveTrxPair(exp1, exp2, CATS_TYPE_INTS, LANG_TYPE_INTS, thisUser, errMsgContainer)
 	
 	if saved:
 		return HttpResponse("expressions pair saved")	
 	else:
-		return HttpResponseServerError("expressions pair failed to save")	
+		return HttpResponseServerError("expressions pair failed to save, " + errMsgContainer['message'])	
 
 		
 		
@@ -482,8 +491,8 @@ def handleRequestNextQuestion(request):
 	
 	
 
-	
-def saveTrxPair(exp1, exp2, catsType, langType, thisUser):
+#errMsgContainer is expected to be a dictionary with key message 	
+def saveTrxPair(exp1, exp2, catsType, langType, thisUser, errMsgContainer):
 
 	"""
 	saves to database new expressions translation pair 
@@ -497,9 +506,9 @@ def saveTrxPair(exp1, exp2, catsType, langType, thisUser):
 	
 	#just some validations 
 	
-	log("entering saveTrxPair(exp1, exp2....)")
-	log("exp1= " + str(exp1))
-	log("exp2= " + str(exp2))
+	#log("entering saveTrxPair(exp1, exp2....)")
+	#log("exp1= " + str(exp1))
+	#log("exp2= " + str(exp2))
 	
 	if not validateExpression(exp1[KEY_EXP_STR], exp1[KEY_LANG], exp1[KEY_FREQ]) or not validateExpression(exp2[KEY_EXP_STR], exp2[KEY_LANG], exp2[KEY_FREQ]):
 		log("validation of new Expressions failed, aborting save")
@@ -520,14 +529,16 @@ def saveTrxPair(exp1, exp2, catsType, langType, thisUser):
 		if len(lang1Set) is 0:
 			msg="could not load language with id " + exp1[KEY_LANG]
 			log(msg)
-			return (False, msg)
+			errMsgContainer['message']=msg
+			return False 
 		else:
 			lang1=lang1Set[0] 
 		lang1Set = Language.objects.filter(id=exp2[KEY_LANG])
 		if len(lang1Set) is 0:
 			msg="could not load language with id " + exp2[KEY_LANG]
 			log(msg)
-			return (False, msg)
+			errMsgContainer['message']=msg
+			return False 
 		else:
 			lang2=lang1Set[0] 
 			
@@ -550,43 +561,53 @@ def saveTrxPair(exp1, exp2, catsType, langType, thisUser):
 			lang2=lang1Set[0] 
 	
 	
-	
-	def catOwnedOrPublic(cat, user):
-		return cat.is_public or cat.ownerr == user
+	#helper func
+	def catOwnedOrPublic(cat, thisUserId):
+		log("entering catOwnedOrPublic(), cat={cat}, cat.owner={owner}".format(cat=cat, owner=cat.owner))
+		log("cat.isPublic={public}, thisUserId={user}".format(public=cat.is_public, user=thisUserId))
+		
+		return cat.is_public or cat.owner_id == thisUserId
 	
 	
 	#check whether any of the categories is new. if so, create it in database. 
 	#creating newe categories this way only possible when cats are given as strings 
-	
-	#cats given as id are assumed to be 
-	#existing in database
+	#cats given as ids are assumed to be existing in database
 	#belong to current user, or public. the client should take care of that, by only 
 	#aloowing such cats to be selected. this could be considered a weaknes in architecture. 
+	#
 	#cats given as straing are either new, in whhich case there is not really a problem of 
 	#private access/ownership, or they are loaded at this point, bellow, then we can 
 	#check proper private access/ownership 
+	#adding tags as string is supporting only private tags.(editing privacy of 
+	#existing tags by their owner should be supported in future)
 	
 	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp1:
 		sentCats = exp1[KEY_CATS_STRS]
 		for cat in sentCats:
-			q = Catagory.objects.filter(category=cat)
+			loadedCats = Catagory.objects.filter(category=cat)
 			#category is new
-			if len(q) is 0:
-				Catagory(category=cat).save()
+			if len(loadedCats) is 0:
+				Catagory(category=cat, is_public=False, owner_id=thisUser).save()
 			else:
-				if not catOwnedOrPublic(cat, thisUser):
-					return (False, "Error-all catgories must be owned by user or public")
+				if not catOwnedOrPublic(loadedCats[0], thisUser):
+					errMsgContainer['message']="""Error-all catgories must be owned by user or public,srcExp={srcExp},trgExp={trgExp}""".format(srcExp=exp1[KEY_EXP_STR], trgExp=exp2[KEY_EXP_STR])
+					return False  
 	if catsType is CATS_TYPE_STRINGS and KEY_CATS_STRS in exp2:
 		sentCats = exp2[KEY_CATS_STRS]
 		for cat in sentCats:
-			q = Catagory.objects.filter(category=cat)
-			#category is new
-			if len(q) is 0:
-				Catagory(category=cat).save()
+			loadedCats = Catagory.objects.filter(category=cat)
+			#category is new	
+			if len(loadedCats) is 0:
+				Catagory(category=cat, is_public=False, owner_id=thisUser).save()
 			else:
-				if not catOwnedOrPublic(cat, thisUser):
-					return (False, "Error-all catgories must be owned by user or public")
+				if not catOwnedOrPublic(loadedCats[0], thisUser):
+					errMsgContainer['message']="""Error-all catgories must be owned by user or public,srcExp={srcExp},trgExp={trgExp}""".format(srcExp=exp1[KEY_EXP_STR], trgExp=exp2[KEY_EXP_STR])
+					return False 
 	
+	
+	
+	
+				
 	
 	
 	#check whether expression already exists, requires match of language, expresson and categories (that is,
@@ -664,8 +685,9 @@ def saveTrxPair(exp1, exp2, catsType, langType, thisUser):
 	persistnaceExp1.translations.add(persistnaceExp2)
 	persistnaceExp2.save()
 	persistnaceExp1.save()
-	return (True, "it's all good, man") 
-
+	
+	errMsgContainer['message']="it's all good, man"
+	return True 
 
 
 	
