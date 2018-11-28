@@ -11,14 +11,10 @@
 	</head>
 	<body>
 	
+	
+	<!--
 		<div class="panel1">
-			<div id="add language">
-				add language: 
-				<input type="text" id="languageInput" />
-				<button id="submitLanguage">submit
-				
-				</button>
-			</div>
+			
 			
 			<div id="load languages">
 				load Languages
@@ -28,31 +24,12 @@
 				</button>
 			</div>
 				
-			<div id="languagesList">
-				language source 
-				<select name="languages" id="langList">
-					
-				</select>
-			</div>
 			
-			
-			<div id="languagesListTarget">
-				language target 
-				<select name="languagesTarget" id="langListTarget">
-					
-				</select>
-			</div>
 		</div>
 		
 		
 		<div class="panel1">
-			<div id="add categories">
-				add category: 
-				<input type="text" id="textInputcategories" />
-				<button id="submitInsertCategory">submit
-				</button>
-				<input type="checkbox" id="checkBoxCatIdPrivate">private<br>
-			</div>
+			
 			
 			<div id="load categories">
 				load categories
@@ -65,52 +42,8 @@
 		</div>
 		
 		
-		
-		
-		<div  class="panel1">
-			get logged in user info test
-			<button id=btnLoggedInUserInfo>go</button>
-			
-		</div>
-		
-		
 		<div class="panel1">
-			<div id="newExpression">
-				new expression
-				<input type="text" id="newExpressionText" />
-				<label for="inSrcWeight">weight(min 0.0, max 1.0)</label>
-				<input type="number" id="inSrcWeight" name="inSrcWeight"
-					min="0" max="1" step="0.05" value="0.5"/>
-				<div>
-					<button id="btnVisibilityCatsSrc">+-</button>
-				</div>
-				<div id=divSrcCats>
-					<fieldset id="fieldSetSrcCats">  
-						<legend>categories</legend>  
-						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
-						<br>  
-					</fieldset> 
-				</div>
-			</div>
-			<div id="newExpressionTarget">
-				new expression target
-				<input type="text" id="newExpressionTargetText" />
-				<label for="inTrgWeight">weight(min 0.0, max 1.0)</label>
-				<input type="number" id="inTrgWeight" name="inTrgWeight"
-					min="0" max="1" step="0.05" value="0.5"/>
-				<div>
-					<button id="btnVisibilityCatsTrg">+-</button>
-				</div>
-				<div id=divTrgCats>
-					<fieldset id="fieldSetTrgCats">  
-						<legend>categories</legend>  
-						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
-						<br>  
-					</fieldset> 
-				</div>
-			</div>
-			<!--<button id=submitExpression>submit single</button>-->
-			<button id=submitExpressionWTrx>submit full</button>
+			
 		</div>
 		
 		
@@ -125,16 +58,7 @@
 			<button id=btnAddUser>submit</button>
 		</div>
 		
-		<div id=divLogIn class="panel1">
-			log user on
-			<div id="newUser">
-				user name
-				<input type="text" id="logUesrText" />
-				password
-				<input type="text" id="logPassText" />
-			</div>	
-			<button id=btnLogOn>submit</button>
-		</div>
+		
 		
 		<div id=divLoggedUser class="panel1" >
 			logged on User: <div  id=divLoggedUserName></div>
@@ -146,66 +70,193 @@
 			<button id=btnBrowsFiles>Open File Dialog</button>	
 		</div>
 		
+			
+			
+		-->
+		
+		<!--**********************************************************-->
+		
+		<div id="divTopBar" style="display: flex; justify-content: flex-end">
+			<label id="labelLoggedUser"></label>
+			<button id="btnSwitchUser">switchUser</button>
+		</div>
 		
 		
+		<div id="divPageSwitchLog">
+			<button id="btnLogIn">log in</button>
+			<button id="btnRegister">register new user</button>
+		</div>
+		
+		<div id="divPageLogOn">
+			<div id=divLogIn class="panel1">
+				log user on
+				<div id="divLogCred">	
+					<input type="text" id="logUesrText" value="user name"/>
+					<input type="text" id="logPassText" value="password"/>
+				</div>	
+				<button id=btnLogOn>submit</button>
+			</div>
+		</div>
+		
+		<div id="divPageRegister">
+			<div id=divRegisterUser class="panel1">
+				register user
+				<div id="newUser">
+					<input type="text" id="newUserText" value="user name"/>
+					<input type="text" id="newUserPassWordText" value="password"/>
+				</div>	
+				<button id=btnAddUser>submit</button>
+			</div>
+		</div>
+		
+		<div id="divPageSwitchAction">
+			<button id="btnPractice">practice</button>
+			<button id="btnEdit">edit</button>
+		</div>
 		
 		
+		<div id="divPagePracticeSetup">
+			<div id="divLangListNextQSrc">
+				language source 
+				<select name="languagesNextQSrc" id="langListNextQSrc">
+						
+				</select>
+			</div>
+			<div id=divNextQCats>
+				<button id="btnVisibilityCatsNextQ">+-</button>
+				<fieldset id="fieldSetNextQCats">  
+					<legend>categories</legend>  
+							<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   		
+					<br>  
+				</fieldset> 
+			</div>
+			<div id="divLangListNextQTrg">
+				language target
+				<select name="languagesNextQTrg" id="langListNextQTrg">
+								
+				</select>
+			</div>
+		</div>
+
 		
-		<div id=divQandA class="panel1" >
+		<div id="divPageShowQandA">
 			<div id=divQuestion>
 				<div id=divNextQ class="panel1" >
 					<button id=btnNextQ>next question</button>
-					<div>
-						<button id="btnVisibilityCatsNextQ">+-</button>
-					</div>
-					<div id=divNextQCats>
-						<fieldset id="fieldSetNextQCats">  
-						<legend>categories</legend>  
-							<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   						<br>  
-						</fieldset> 
-					</div>
-					<div id="divLangListNextQSrc">
-						language source 
-						<select name="languagesNextQSrc" id="langListNextQSrc">
-							
-						</select>
-					</div>
-					<div id="divLangListNextQTrg">
-						language target
-						<select name="languagesNextQTrg" id="langListNextQTrg">
-							
-						</select>
-					</div>
 				</div>
 				<textarea id=textQuestion rows="1" cols="50" readonly></textarea>
-				
-			</div>
-			<!--TODO- consider multiple answers/translations (maybe change 
-			height dynamically?)-->
-			<!--<button id=btnLoadNextQuesiton>load next question</button> -->
-			<button id=btnShowAnswer>show answer</button>
+			</div>	
+			
 			<div id=divAnswer>
-				<textarea id=textAnswer rows="4" cols="50" readonly>answer place holder</textarea>
-				<div id="wrapper">
-					<label for="answer_radio">Did you know any of the answers?</label>
-					<p>
-						<input type="radio" name="correct_answer" value=1 checked>Yes</input>
-					</p>
-					<p>
-						<input type="radio" name="correct_answer" value=0>No</input>
-					</p>
+				<!--TODO- consider multiple answers/translations (maybe change 
+				height dynamically?)-->
+				<!--<button id=btnLoadNextQuesiton>load next question</button> -->
+				<button id=btnShowAnswer>show answer</button>
+				<div id=divAnswer>
+					<textarea id=textAnswer rows="4" cols="50" readonly>answer place holder</textarea>
+					<div id="wrapper">
+						<label for="answer_radio">Did you know any of the answers?</label>
+						<p>
+							<input type="radio" name="correct_answer" value=1 checked>Yes</input>
+						</p>
+						<p>
+							<input type="radio" name="correct_answer" value=0>No</input>
+						</p>
+					</div>
 				</div>
+				<button id=btnSendCorrct>send</button>	
 			</div>
-			<button id=btnSendCorrct>send</button>	
+			<button id=btnChangePracticeSetup>change practice setup</button>
 		</div>
 		
 		
+		<div id="divPageSwitchEditAction">
+			<button id="btnAddLanguage">add language</button>
+			<button id="btnAddCategory">add category</button>
+			<button id="btnAddTranslation">add translation</button>
+			<button id="btnAddTranslationsFromFile">load dict file</button>
+		</div>
 		
 		
+		<div id="divPageInsertLanguage">
+			<input type="text" id="languageInput" value="newLanguageName"/>
+			<button id="submitLanguage">submit	
+			</button>
+		</div>
+
+		
+		<div id="divPageAddCats">
+			<input type="text" id="textInputcategories" value="newCategory" />
+			<button id="submitInsertCategory">submit
+			</button>
+			<input type="checkbox" id="checkBoxCatIdPrivate">private<br>
+		</div>
+		
+		
+		<!--  use for either choosing 1 or 2 language. for former, hide 2nd list-->
+		<div id="divPageSelectLangEdit">
+			<div id="divLangListEdit1">
+				language source 
+				<select name="languages" id="langListEdit1">
+					
+				</select>
+			</div>
+			
+			<div id="divLangListEdit2">
+				language target 
+				<select name="languagesTarget" id="langListEdit2">
+					
+				</select>
+			</div>
+		</div>
+
+		
+		<div id="divPageAddTrxPair">
+			<div id="newExpression">		
+				<input type="text" id="newExpressionText" value="new word source"/>
+				<label for="inSrcWeight">weight(min 0.0, max 1.0)</label>
+				<input type="number" id="inSrcWeight" name="inSrcWeight"
+						min="0" max="1" step="0.05" value="0.5"/>
+				<div>
+					<button id="btnVisibilityCatsSrc">+-</button>
+				</div>
+				<div id=divSrcCats>
+					<fieldset id="fieldSetSrcCats">  
+						<legend>categories</legend>  
+						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
+						<br>  
+					</fieldset> 
+				</div>
+			</div>
+			
+			<div id="newExpressionTarget">
+				<input type="text" id="newExpressionTargetText" value="new word target"/>
+				<label for="inTrgWeight">weight(min 0.0, max 1.0)</label>
+				<input type="number" id="inTrgWeight" name="inTrgWeight"
+					min="0" max="1" step="0.05" value="0.5"/>
+				<div>
+					<button id="btnVisibilityCatsTrg">+-</button>
+				</div>
+				<div id=divTrgCats>
+					<fieldset id="fieldSetTrgCats">  
+						<legend>categories</legend>  
+						<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   
+						<br>  
+					</fieldset> 
+				</div>
+				<!--<button id=submitExpression>submit single</button>-->
+				<button id=submitExpressionWTrx>submit full</button>
+			</div>
+		</div>
+
+		
+		
+		
+		<!--
 		<div id=divTest class="panel1" >
 			<button id=btnTest>Test</button>	
 		</div>
-		
+		-->
 		
 			
 		
@@ -234,9 +285,9 @@
 			}
 			
 			var currentSelections = {
-				language:null, 
+				languageEdit1:null, 
+				languageEdit2: null,
 				category: null,
-				languageTarget: null,
 				languageNextQSourcce:null, 
 				languageNextQTarget:null
 			}
@@ -252,6 +303,101 @@
 				console.log("--DEBUG--" + msg);
 				//alert(msg);
 			}
+			
+			
+			
+			function pageSwitchLoginReg(){
+				hideAllPages();
+				$("#divPageSwitchLog").show();
+			}
+			function pageSwitchLogin(){
+				hideAllPages();
+				$("#divPageLogOn").show();
+			}
+			function pageSwitchRegister(){
+				hideAllPages();
+				$("#divPageRegister").show();
+			}
+			function pageSwitchPracticeEdit(){
+				hideAllPages();
+				$("#divPageSwitchAction").show();
+			}
+			function pageSwitchPracticeSetup(){
+				hideAllPages();
+				$("#divPagePracticeSetup").show();
+			}
+			function pageSwitchShowQuesiton(){
+				hideAllPages();
+				$("#divPageShowQandA").show();
+				$("#divAnswer").hide();	
+			}
+			function pageSwitchShowAnswer(){
+				hideAllPages();
+				$("#divPageShowQandA").show();
+				$("#divAnswer").show();	
+			}
+			function pageSwitchEditCasesSwitch(){
+				hideAllPages();
+				$("#divPageSwitchEditAction").show();
+			}
+			function pageSwitchInsertLanguage(){
+				hideAllPages();
+				$("#divPageInsertLanguage").show();
+			}
+			function insertCategory(){
+				hideAllPages();
+				$("#divPageAddCats").show();
+			}
+			
+			function choolseEditLanguage(full){
+				hideAllPages();
+				$("#divPageSelectLangEdit").show();
+			}
+			
+			
+			function getStarted(){
+				sendGetLoginInfo(
+					function(data){
+						if(data.isLogged){
+							//setPanelLoggedOn(data.username);
+							pageSwitchPracticeEdit();
+							loggedOnUserName=data.username;
+							$("#labelLoggedUser").text(data.username);
+							$("#btnSwitchUser").show();
+							
+						}else{
+							//setPanelLoggedOff();
+							pageSwitchLoginReg();
+							loggedOnUserName=null;
+							$("#labelLoggedUser").text("");
+							$("#btnSwitchUser").hide();
+						}
+					}
+				);
+				loadCategories();
+				loadLanguages();
+			}
+			
+			function hideAllPages(){
+				$("#divPageSwitchLog").hide();
+				$("#divPageLogOn").hide();
+				$("#divPageRegister").hide();
+				$("#divPageSwitchAction").hide();
+				$("#divPagePracticeSetup").hide();
+				$("#divPageShowQandA").hide();
+				$("#divPageSwitchEditAction").hide();
+				$("#divPageInsertLanguage").hide();
+				$("#divPageAddCats").hide();
+				$("#divPageSelectLangEdit").hide();
+				$("#divPageAddTrxPair").hide();
+			}
+
+			
+			
+			
+			
+			
+			
 			
 			
 			//true inidicated visible and vice verca 
@@ -276,6 +422,15 @@
 			}
 			
 			
+			/*
+			PAGE_SWITCH_LOG_ON_REG = "pageSwitchLogOnReg"
+			pages =  {};
+			pages[PAGE_SWITCH_LOG_ON_REG]={
+				function show(){
+				
+				}
+			}
+			*/
 			
 			
 			
@@ -396,7 +551,7 @@
 			in lists of available languages 
 			**/
 			
-			function loadLangButton(){
+			function loadLanguages(){
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}"
 				}
@@ -422,20 +577,20 @@
 			**/
 			function populateLanguagesListBox(languages){
 				
-				lngLists= [$("#langList"),$("#langListTarget"),$("#langListNextQSrc"), $("#langListNextQTrg")]
+				lngLists= [$("#langListEdit1"),$("#langListEdit2"),$("#langListNextQSrc"), $("#langListNextQTrg")]
 				for(i=0; i<lngLists.length; i++){
 					lngLists[i].empty();
 				}
 				
-				currentSelections.language = null;
-				currentSelections.languageTarget = null;
+				currentSelections.languageEdit1 = null;
+				currentSelections.languageEdit2 = null;
 				for(i = 0; i < languages.length; i++){
 					var newLelm = "<option value='" + languages[i].id + "'>" + languages[i].lang + "</option>";
 					for(j=0; j <lngLists.length; j++){
 						lngLists[j].append(newLelm);
 					}
 				}
-				currentSelections.language = null;
+				currentSelections.languageEdit1 = null;
 			}
 			
 			
@@ -444,7 +599,7 @@
 			**/
 			function submitExpression(){
 				newExpreesion = $("#newExpressionText").val();
-				if (currentSelections.language == null || newExpreesion == null || newExpreesion == ""){
+				if (currentSelections.languageEdit1 == null || newExpreesion == null || newExpreesion == ""){
 					debugQuick("please make sure that epxresson is not empty and langaue is selected");
 					return;
 				}
@@ -452,7 +607,7 @@
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
 					'expression': newExpreesion, 
-					'languageID' : currentSelections.language
+					'languageID' : currentSelections.languageEdit1
 				}
 				
 				$.ajax({
@@ -506,8 +661,8 @@
 			function submitExpressionFull(){
 				var newExpreesion = $("#newExpressionText").val();
 				var newExpressionTarget = $("#newExpressionTargetText").val();
-				if (currentSelections.language == null || newExpreesion == null || newExpreesion == "" ||
-				currentSelections.languageTarget == null || newExpressionTarget == null || newExpressionTarget == ""
+				if (currentSelections.languageEdit1 == null || newExpreesion == null || newExpreesion == "" ||
+				currentSelections.languageEdit2 == null || newExpressionTarget == null || newExpressionTarget == ""
 				){
 					debugQuick("please make sure that epxresson is not empty and langaue is selected for both source and target");
 					return;
@@ -520,11 +675,11 @@
 				var post_data = {
 					'csrfmiddlewaretoken':"{{ csrf_token }}", 
 					'expression1': newExpreesion, 
-					'languageID1' : currentSelections.language,
+					'languageID1' : currentSelections.languageEdit1,
 					'weight1' : weight1, 
 					'cats1' : cats1, 
 					'expression2': newExpressionTarget, 
-					'languageID2' : currentSelections.languageTarget,
+					'languageID2' : currentSelections.languageEdit2,
 					'weight2' : weight2,
 					'cats2' : cats2
 				}
@@ -937,7 +1092,7 @@
 			);
 			
 			$("#loadLangButton").click(
-				loadLangButton
+				loadLanguages
 			);
 			
 			$("#btnAddUser").click(
@@ -1020,11 +1175,11 @@
 			
 			
 			
-			$("#langList").change(
+			$("#langListEdit1").change(
 				function(){
 					//var selectedLanguageID = $(this).find('option:selected').text();
 					var selectedLanguageID = $(this).find('option:selected').val();
-					currentSelections.language = selectedLanguageID;
+					currentSelections.languageEdit1 = selectedLanguageID;
 				}
 			);
 			
@@ -1032,7 +1187,7 @@
 				function(){
 					//var selectedLanguageID = $(this).find('option:selected').text();
 					var selectedLanguageID = $(this).find('option:selected').val();
-					currentSelections.languageTarget = selectedLanguageID;
+					currentSelections.languageEdit2 = selectedLanguageID;
 				}
 			);
 			
@@ -1067,11 +1222,17 @@
 			$("#btnShowAnswer").click(function(){$("#textAnswer").show();});
 			$("#btnSendCorrct").click(sendUpdateCorrect);
 
+			$("#btnPractice").click(pageSwitchPracticeSetup);
+			$("#btnEdit").click(pageSwitchEditCasesSwitch);
+			
+
+			
 			
 			
 			//when page first opens, get the logged on info from server 
-			obtainLogOnInfo();
+			///obtainLogOnInfo();
 			
+			getStarted();
 			
 		</script>
 	</body>
