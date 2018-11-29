@@ -356,6 +356,8 @@
 			
 			
 			function getStarted(){
+				//first hide all pages, for smoother transition 
+				hideAllPages();
 				sendGetLoginInfo(
 					function(data){
 						if(data.isLogged){
@@ -493,7 +495,11 @@
 					//console.log(data);
 					debugQuick(data);
 					if(data.success){
-						setPanelLoggedOn(userName);
+						//setPanelLoggedOn(userName);
+						loggedOnUserName=userName;
+						$("#labelLoggedUser").text(userName);
+						$("#btnSwitchUser").show();
+						pageSwitchPracticeEdit();
 					}
 					
 				  },
@@ -529,11 +535,15 @@
 					//console.log(data);
 					debugQuick(data);
 					if(data.success){
-						setPanelLoggedOn(userName);
-						loggedOnUserName=username;
+						//setPanelLoggedOn(userName);
+						loggedOnUserName=userName;
+						$("#labelLoggedUser").text(userName);
+						$("#btnSwitchUser").show();
+						pageSwitchPracticeEdit();
+						
 					}else{
 						alert("log in failed");
-						setPanelLoggedOff();
+						//setPanelLoggedOff();
 					}
 					
 				  },
@@ -703,17 +713,19 @@
 			/**
 			set panel to given logged user
 			**/
+			/*
 			function setPanelLoggedOn(userName){
 				$("#divLoggedUser").show();
 				$("#divLoggedUserName").append(userName);
 				$("#divRegisterUser").hide();
 				$("#divLogIn").hide();
 			}
+			*/
 			
 			/**
 			set panel to no logged user
 			**/
-			
+			/*
 			function setPanelLoggedOff(){
 				$("#divLoggedUser").hide();
 				$("#divLoggedUserName").empty();
@@ -724,10 +736,13 @@
 				$("#logUesrText").val("");
 				$("#logPassText").val("");
 			}
-			
+			*/
 			/**
 				get logged on Info from server and update pannels according to result
 			**/
+			
+			/*
+			
 			function obtainLogOnInfo (){
 				var callBack = function handleRsult(data){
 					debugQuick(data);
@@ -735,11 +750,13 @@
 						setPanelLoggedOn(data.username);
 						loggedOnUserName=data.username;
 					}else{
-						setPanelLoggedOff();
+						//setPanelLoggedOff();
 					}
 				}
 				sendGetLoginInfo(callBack);
 			}
+			*/
+			
 			
 			/**
 			send request to log user off
@@ -756,8 +773,13 @@
 				  data:post_data,
 				  success:function(data){
 					debugQuick(data);
-					setPanelLoggedOff();
+					//setPanelLoggedOff();
 					loggedOnUserName=null;
+					
+					$("#labelLoggedUser").text("");
+					$("#btnSwitchUser").hide();
+					//back to start 
+					getStarted();
 				  },
 				  error:function(error){
 					debugQuick(error.responseText);
@@ -1083,6 +1105,11 @@
 			*/
 
 			
+			function switchUser(){
+				sendLogOff();
+			}
+			
+			
 		
 			/**
 			set up liseterners 
@@ -1216,7 +1243,7 @@
 			$("#submitExpression").click(submitExpression);
 			$("#submitExpressionWTrx").click(submitExpressionFull);
 			//$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
-			$("#btnLoggedInUserInfo").click(obtainLogOnInfo);
+			//$("#btnLoggedInUserInfo").click(obtainLogOnInfo);
 			$("#btnLogOn").click(sendLogOn);
 			$("#textAnswer").hide();
 			$("#btnShowAnswer").click(function(){$("#textAnswer").show();});
@@ -1225,7 +1252,9 @@
 			$("#btnPractice").click(pageSwitchPracticeSetup);
 			$("#btnEdit").click(pageSwitchEditCasesSwitch);
 			
-
+			$("#btnLogIn").click(pageSwitchLogin);
+			$("#btnRegister").click(pageSwitchRegister);
+			$("#btnSwitchUser").click(switchUser);
 			
 			
 			
