@@ -122,8 +122,8 @@
 						
 				</select>
 			</div>
+			<button id="btnVisibilityCatsNextQ">+-</button>
 			<div id=divNextQCats>
-				<button id="btnVisibilityCatsNextQ">+-</button>
 				<fieldset id="fieldSetNextQCats">  
 					<legend>categories</legend>  
 							<!-- <input type="checkbox" name="favorite_pet" value="Cats" >Cats<br> -->   		
@@ -136,23 +136,25 @@
 								
 				</select>
 			</div>
+			<button id="btnStartPractice">startPractice</button>
 		</div>
 
 		
 		<div id="divPageShowQandA">
 			<div id=divQuestion>
+				<!--
 				<div id=divNextQ class="panel1" >
 					<button id=btnNextQ>next question</button>
 				</div>
+				-->
 				<textarea id=textQuestion rows="1" cols="50" readonly></textarea>
 			</div>	
-			
+			<button id=btnShowAnswer>show answer</button>
 			<div id=divAnswer>
 				<!--TODO- consider multiple answers/translations (maybe change 
 				height dynamically?)-->
 				<!--<button id=btnLoadNextQuesiton>load next question</button> -->
-				<button id=btnShowAnswer>show answer</button>
-				<div id=divAnswer>
+				<div>
 					<textarea id=textAnswer rows="4" cols="50" readonly>answer place holder</textarea>
 					<div id="wrapper">
 						<label for="answer_radio">Did you know any of the answers?</label>
@@ -1019,7 +1021,9 @@
 			
 			function handleNextQResponse(res){
 				if(res == null){
-					$("#textQuestion").val("no matching words for selected search parameters")
+					//$("#textQuestion").val("no matching words for selected search parameters")
+					//return;
+					alert("for given parmeters there are no results");
 					return;
 				}
 				console.log("NextQ Resoponse:");
@@ -1027,6 +1031,7 @@
 				$("#textQuestion").val(res.expStr)
 				currentQuestion.expId=res.expId;
 				sendLoadTranslations();
+				pageSwitchShowQuesiton();
 			}
 			
 			
@@ -1050,7 +1055,7 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
-					
+					sendNextQReuest();
 				  },
 				  error:function(error){
 					//console.log(error);
@@ -1245,8 +1250,10 @@
 			//$("#btnLoggedInUserInfo").click(sendGetLoginInfo);
 			//$("#btnLoggedInUserInfo").click(obtainLogOnInfo);
 			$("#btnLogOn").click(sendLogOn);
-			$("#textAnswer").hide();
-			$("#btnShowAnswer").click(function(){$("#textAnswer").show();});
+			//$("#textAnswer").hide();
+			//$("#btnShowAnswer").click(function(){$("#textAnswer").show();});
+			$("#btnShowAnswer").click(function(){$("#divAnswer").show();});
+
 			$("#btnSendCorrct").click(sendUpdateCorrect);
 
 			$("#btnPractice").click(pageSwitchPracticeSetup);
@@ -1256,6 +1263,8 @@
 			$("#btnRegister").click(pageSwitchRegister);
 			$("#btnSwitchUser").click(switchUser);
 			
+			$("#btnStartPractice").click(sendNextQReuest);
+			$("#btnChangePracticeSetup").click(pageSwitchPracticeSetup);
 			
 			
 			//when page first opens, get the logged on info from server 
