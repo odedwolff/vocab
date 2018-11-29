@@ -173,16 +173,22 @@
 		
 		
 		<div id="divPageSwitchEditAction">
-			<button id="btnAddLanguage">add language</button>
+			<button id="btnEditLanguages">edit languages</button>
 			<button id="btnAddCategory">add category</button>
 			<button id="btnAddTranslation">add translation</button>
 			<button id="btnAddTranslationsFromFile">load dict file</button>
 		</div>
 		
 		
-		<div id="divPageInsertLanguage">
+		<div id="divPageEditLanguages">
+			<select name="listLanguagesEdit" id="langListEdit" multiple="no" size="20">
+			</select> 
+
+			
 			<input type="text" id="languageInput" value="newLanguageName"/>
 			<button id="submitLanguage">submit	
+			</button>
+			<button id="btnDoneEditLang">done	
 			</button>
 		</div>
 
@@ -342,9 +348,9 @@
 				hideAllPages();
 				$("#divPageSwitchEditAction").show();
 			}
-			function pageSwitchInsertLanguage(){
+			function pageSwitchEditLanguages(){
 				hideAllPages();
-				$("#divPageInsertLanguage").show();
+				$("#divPageEditLanguages").show();
 			}
 			function insertCategory(){
 				hideAllPages();
@@ -390,7 +396,7 @@
 				$("#divPagePracticeSetup").hide();
 				$("#divPageShowQandA").hide();
 				$("#divPageSwitchEditAction").hide();
-				$("#divPageInsertLanguage").hide();
+				$("#divPageEditLanguages").hide();
 				$("#divPageAddCats").hide();
 				$("#divPageSelectLangEdit").hide();
 				$("#divPageAddTrxPair").hide();
@@ -462,6 +468,7 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
+					loadLanguages();
 					
 				  },
 				  error:function(error){
@@ -589,7 +596,7 @@
 			**/
 			function populateLanguagesListBox(languages){
 				
-				lngLists= [$("#langListEdit1"),$("#langListEdit2"),$("#langListNextQSrc"), $("#langListNextQTrg")]
+				lngLists= [$("#langListEdit1"),$("#langListEdit2"),$("#langListNextQSrc"), $("#langListNextQTrg"), $("#langListEdit")]
 				for(i=0; i<lngLists.length; i++){
 					lngLists[i].empty();
 				}
@@ -1114,6 +1121,11 @@
 				sendLogOff();
 			}
 			
+			function doneEditLang(){
+				$("#languageInput").val("");
+				pageSwitchEditCasesSwitch();
+			}
+			
 			
 		
 			/**
@@ -1265,6 +1277,11 @@
 			
 			$("#btnStartPractice").click(sendNextQReuest);
 			$("#btnChangePracticeSetup").click(pageSwitchPracticeSetup);
+			
+			$("#btnEditLanguages").click(function(){pageSwitchEditLanguages();});
+			$("#btnDoneEditLang").click(doneEditLang);
+			
+			
 			
 			
 			//when page first opens, get the logged on info from server 
