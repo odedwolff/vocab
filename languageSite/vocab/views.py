@@ -137,7 +137,7 @@ def uploadTranslationsBatch(request):
 		
 	return HttpResponse(rtMsg)
 	
-
+#conerts a lists of strings to a list of ints they represent 
 def parseListOfInts(listOfInts):
 	out = []
 	for elm in listOfInts:
@@ -561,7 +561,14 @@ def saveTrxPair(exp1, exp2, catsType, langType, thisUser, errMsgContainer):
 			lang2=lang1Set[0] 
 	
 	
-	#helper func
+	#helper funcs
+	def serCats(cats):
+		out="["
+		for cat in cats:
+			out += "(" + str(cat) + ")"
+		out += "]"
+		return out 
+		
 	def catOwnedOrPublic(cat, thisUserId):
 		log("entering catOwnedOrPublic(), cat={cat}, cat.owner={owner}".format(cat=cat, owner=cat.owner))
 		log("cat.isPublic={public}, thisUserId={user}".format(public=cat.is_public, user=thisUserId))
@@ -634,17 +641,21 @@ def saveTrxPair(exp1, exp2, catsType, langType, thisUser, errMsgContainer):
 	
 	if cats1:
 		cats1.sort()
-		cats1F1atted = json.dumps(cats1)
+		#cats1F1atted = json.dumps(cats1)
+		cats1F1atted = serCats(cats1)
 	else:
 		cats1F1atted = ""
 	if cats2:
 		cats2.sort()
-		cats2F1atted = json.dumps(cats2)
+		#cats2F1atted = json.dumps(cats2)
+		cats1F1atted = serCats(cats2)
 	else:
 		cats2F1atted = ""
 		
 	log("cats1F1atted=" + cats1F1atted)	
 	log("cats2F1atted=" + cats2F1atted)	
+	
+	
 	
 	
 	
@@ -740,7 +751,8 @@ def nextQuestion(request):
 	if cats:
 		catsParsedInts = parseListOfInts(cats)
 		catsParsedInts.sort()
-		catsStr=json.dumps(catsParsedInts)
+		#catsStr=json.dumps(catsParsedInts)
+		catsStr=likeClauseInclude(catsParsedInts)
 	else:
 		catsStr ="" 
 	
@@ -752,6 +764,15 @@ def nextQuestion(request):
 	return JsonResponse(outData, safe=False)
 	#return HttpResponse("implementation under construction")	
 
+
+#converts a sorted list of integer of the form [n1,n2,n3] to an sql LIKE clause expression
+#of the form "%n1%n2%n3"
+def likeClauseInclude(cats):
+	out = "%"
+	for cat in cats:
+		out+="(" + str(cat)+")%"
+	return out
+	
 	
 
 #if the last char is a ']' - trim it 	
@@ -782,7 +803,7 @@ def getNextQFromDb(srcLanguage, trgLanguage, userId, catsSer):
 	""".format(srcLngId=srcLanguage , cats=catsSer + '%', trgLng=trgLanguage,  userId=userId)
 	
 	
-	#log("formatted querry={q}".format(q=query))
+	log("formatted querry={q}".format(q=query))
 	
 	
 	crs = connection.cursor()

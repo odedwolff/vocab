@@ -216,6 +216,8 @@
 					
 				</select>
 			</div>
+			<button id="btnGoSelLangEdit">go
+			</button>
 		</div>
 
 		
@@ -352,14 +354,32 @@
 				hideAllPages();
 				$("#divPageEditLanguages").show();
 			}
-			function insertCategory(){
+			function pageSwitchInsertCategory(){
 				hideAllPages();
 				$("#divPageAddCats").show();
 			}
 			
-			function choolseEditLanguage(full){
+			function pageSwitchInsertTrxGUI(){
+				hideAllPages();
+				//if languages are not already slected, go to lang seleciton page
+				if(!currentSelections.languageEdit1 || !currentSelections.languageEdit2){
+					pageSwitchSelectEditLanguages(true);
+				}
+				else{
+					$("#divPageAddTrxPair").show();
+				}
+			}
+			
+			
+			
+			function pageSwitchSelectEditLanguages(full){
 				hideAllPages();
 				$("#divPageSelectLangEdit").show();
+				if(full){
+					$("divLangListEdit2").show();
+				}else{
+					$("divLangListEdit2").hide();
+				}
 			}
 			
 			
@@ -1227,7 +1247,7 @@
 				}
 			);
 			
-			$("#languagesListTarget").change(
+			$("#langListEdit2").change(
 				function(){
 					//var selectedLanguageID = $(this).find('option:selected').text();
 					var selectedLanguageID = $(this).find('option:selected').val();
@@ -1281,7 +1301,11 @@
 			$("#btnEditLanguages").click(function(){pageSwitchEditLanguages();});
 			$("#btnDoneEditLang").click(doneEditLang);
 			
+			$("#btnAddTranslation").click(pageSwitchInsertTrxGUI);
 			
+			$("#btnAddCategory").click(pageSwitchInsertCategory);
+
+			$("#btnGoSelLangEdit").click(pageSwitchInsertTrxGUI);
 			
 			
 			//when page first opens, get the logged on info from server 
