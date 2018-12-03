@@ -264,7 +264,12 @@
 				<button id=submitExpressionWTrx>submit full</button>
 			</div>
 		</div>
-
+	
+		<div id=divFileBrowser class="panel1" style="display: none">
+			<input type="file" style="display: none" id="inFile" />
+			<!--<button id=btnBrowsFiles>Open File Dialog</button>	-->
+		</div>
+		
 		
 		
 		
@@ -1249,8 +1254,8 @@
 			
 			
 			
-			$("#btnBrowsFiles").on("click", function() {
-                //$("input").trigger("click");
+			//$("#btnBrowsFiles").on("click", function() {
+			$("#btnAddTranslationsFromFile").on("click", function() {
 				$("#inFile").trigger("click");
             });
 			
