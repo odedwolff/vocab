@@ -194,10 +194,16 @@
 
 		
 		<div id="divPageAddCats">
+			
+			<select name="grpSelectCatsEdit" id="selectCatsEdit" size=11>
+								
+			</select>
+			
 			<input type="text" id="textInputcategories" value="newCategory" />
 			<button id="submitInsertCategory">submit
 			</button>
 			<input type="checkbox" id="checkBoxCatIdPrivate">private<br>
+			<button id=buttonLeaveEditCats>done</button>
 		</div>
 		
 		
@@ -278,6 +284,7 @@
 			var INPUT_GRP_SRC_EXP = "inputGroupSrcExp";
 			var INPUT_GRP_TRG_EXP = "inputGroupTrgExp";
 			var INPUT_TRP_NEXT_Q = "inputGroupNextQ"
+			var INPUT_GRP_EDIT_CATS = "inputGroupEditCats"
 			/**
 			todo - each language should probably have its own categries, a category should be a subset of a language (consider 
 			rename simply to "subsest" or simlirly )
@@ -846,6 +853,7 @@
 					//console.log(data);
 					debugQuick(data);
 					loadCategories();
+					$("#textInputcategories").val("");
 				  },
 				  error:function(error){
 					//console.log(error);
@@ -892,7 +900,7 @@
 				populateCats(catsData.catListUser, $("#fieldSetSrcCats"), INPUT_GRP_SRC_EXP);
 				populateCats(catsData.catListUser, $("#fieldSetTrgCats"), INPUT_GRP_TRG_EXP);
 				populateCats(catsData.loadedCatsAll, $("#fieldSetNextQCats"), INPUT_TRP_NEXT_Q);
-				
+				populateCatsReadOnly(catsData.catListUser, $("#selectCatsEdit"), INPUT_GRP_EDIT_CATS);
 
 			}
 			
@@ -910,6 +918,24 @@
 					$(domElmContainer).append(newDomElmStr)
 				}
 			}
+			
+			function populateCatsReadOnly(catsData, domElmContainer, groupName){
+				var catStr, catId, newDomElmStr
+				//catsList = catsData.loadedCats;
+				catsList = catsData;
+				$(domElmContainer).empty();
+				for(var i = 0; i < catsList.length; i++)
+				{
+					catStr= catsList[i]["cat"];
+					catId= catsList[i]["id"];
+					var newDomElmStr = 
+						"<option name=  '" + groupName + "' value='" + catId + "'>" + catStr + "</option>";
+					$(domElmContainer).append(newDomElmStr)
+				}
+			}
+			
+			
+			
 			
 			function listSelectedCats(catsGroupName){
 				var checkboxes = document.getElementsByName(catsGroupName);  
@@ -1146,6 +1172,10 @@
 				pageSwitchEditCasesSwitch();
 			}
 			
+			function leaveCatsEditPage(){
+				$("#textInputcategories").val("");
+				pageSwitchEditCasesSwitch()
+			}
 			
 		
 			/**
@@ -1306,6 +1336,8 @@
 			$("#btnAddCategory").click(pageSwitchInsertCategory);
 
 			$("#btnGoSelLangEdit").click(pageSwitchInsertTrxGUI);
+			
+			$("#buttonLeaveEditCats").click(leaveCatsEditPage);
 			
 			
 			//when page first opens, get the logged on info from server 
