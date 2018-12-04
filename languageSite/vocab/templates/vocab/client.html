@@ -174,10 +174,15 @@
 		
 		
 		<div id="divPageSwitchEditAction">
-			<button id="btnEditLanguages">edit languages</button>
-			<button id="btnAddCategory">add category</button>
-			<button id="btnAddTranslation">add translation</button>
-			<button id="btnAddTranslationsFromFile">load dict file</button>
+			<div>
+				<button id="btnEditLanguages">edit languages</button>
+				<button id="btnAddCategory">add category</button>
+				<button id="btnAddTranslation">add translation</button>
+				<button id="btnAddTranslationsFromFile">load dict file</button>
+			</div>
+			<div>
+				<button id="btnEditMainToHome">home</button>
+			</div>
 		</div>
 		
 		
@@ -225,6 +230,8 @@
 			</div>
 			<button id="btnGoSelLangEdit">go
 			</button>
+			<button id="btnCancelSelectLanguage">cancel
+			</button>
 		</div>
 
 		
@@ -244,6 +251,7 @@
 						<br>  
 					</fieldset> 
 				</div>
+				
 			</div>
 			
 			<div id="newExpressionTarget">
@@ -264,6 +272,7 @@
 				<!--<button id=submitExpression>submit single</button>-->
 				<button id=submitExpressionWTrx>submit full</button>
 			</div>
+			<button id=btnLeaveAddTrx>done</button>
 		</div>
 	
 		<div id=divFileBrowser class="panel1" style="display: none">
@@ -397,20 +406,26 @@
 			
 			
 			function pageSwitchPracticeSetupToHome(){
-				deslectCats();
+				deslectCatsPracticeSetup();
+				getStarted();
+			}
+			
+			function pageSwitchLeaveAddTrx(){
+				clearAddTrxPage();
 				getStarted();
 			}
 			
 			
+			var pageSwitchEditMainToHome = getStarted;
 			
 			
-			function deslectCats(){
-				catItems= $("#fieldSetNextQCats *");
+			
+			function deslectCatsPracticeSetup(){
+				var catItems= $("#fieldSetNextQCats *");
 				for (var cat in catItems){
 					$(cat).prop('checked', false);
 					//($($("#fieldSetNextQCats *")[0])).prop('checked', true);
 				}
-			
 			}
 			
 			
@@ -763,7 +778,7 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
-					
+					clearAddTrxPage();
 				  },
 				  error:function(error){
 					//console.log(error);
@@ -1204,6 +1219,37 @@
 				pageSwitchEditCasesSwitch()
 			}
 			
+			
+			function clearAddTrxPage(){
+				var catItems= $("#fieldSetSrcCats *");
+				/*
+				for (var cat in catItems){
+					$(cat).prop('checked', false);
+				}*/
+				for(var i = 0; i < catItems.length ;i++){
+					($(catItems[i])).prop('checked', false);
+				}
+				catItems= $("#fieldSetTrgCats *");
+				/*
+				for (var cat in catItems){
+					$(cat).prop('checked', false);
+				}
+				*/
+				for(var i = 0; i < catItems.length ;i++){
+					($(catItems[i])).prop('checked', false);
+				}
+				
+				
+				
+				
+				$("#newExpressionText").val("");
+				$("#inSrcWeight").val("0.5");
+				$("#newExpressionTargetText").val("");
+				$("#inTrgWeight").val("0.5");
+			}
+			
+			
+			
 		
 			/**
 			set up liseterners 
@@ -1367,6 +1413,12 @@
 			$("#buttonLeaveEditCats").click(leaveCatsEditPage);
 			
 			$("#btnPracticeSetupToHome").click(pageSwitchPracticeSetupToHome);
+
+			$("#btnEditMainToHome").click(pageSwitchEditMainToHome);
+
+			$("#btnCancelSelectLanguage").click(pageSwitchEditCasesSwitch);
+
+			$("#btnLeaveAddTrx").click(pageSwitchLeaveAddTrx);
 
 			
 			
