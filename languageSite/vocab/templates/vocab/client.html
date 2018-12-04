@@ -137,6 +137,7 @@
 				</select>
 			</div>
 			<button id="btnStartPractice">startPractice</button>
+			<button id="btnPracticeSetupToHome">home</button>
 		</div>
 
 		
@@ -393,6 +394,27 @@
 					$("divLangListEdit2").hide();
 				}
 			}
+			
+			
+			function pageSwitchPracticeSetupToHome(){
+				deslectCats();
+				getStarted();
+			}
+			
+			
+			
+			
+			function deslectCats(){
+				catItems= $("#fieldSetNextQCats *");
+				for (var cat in catItems){
+					$(cat).prop('checked', false);
+					//($($("#fieldSetNextQCats *")[0])).prop('checked', true);
+				}
+			
+			}
+			
+			
+	
 			
 			
 			function getStarted(){
@@ -1343,6 +1365,9 @@
 			$("#btnGoSelLangEdit").click(pageSwitchInsertTrxGUI);
 			
 			$("#buttonLeaveEditCats").click(leaveCatsEditPage);
+			
+			$("#btnPracticeSetupToHome").click(pageSwitchPracticeSetupToHome);
+
 			
 			
 			//when page first opens, get the logged on info from server 
