@@ -10,71 +10,7 @@
 		<link rel="stylesheet" href="{% static "vocab/style.css" %}"/>
 	</head>
 	<body>
-	
-	
-	<!--
-		<div class="panel1">
-			
-			
-			<div id="load languages">
-				load Languages
-				
-				<button id="loadLangButton">submit
-				
-				</button>
-			</div>
-				
-			
-		</div>
 		
-		
-		<div class="panel1">
-			
-			
-			<div id="load categories">
-				load categories
-				
-				<button id="btnLoadCategories">submit
-				
-				</button>
-			</div>
-				
-		</div>
-		
-		
-		<div class="panel1">
-			
-		</div>
-		
-		
-		<div id=divRegisterUser class="panel1">
-			register user
-			<div id="newUser">
-				user name
-				<input type="text" id="newUserText" />
-				password
-				<input type="text" id="newUserPassWordText" />
-			</div>	
-			<button id=btnAddUser>submit</button>
-		</div>
-		
-		
-		
-		<div id=divLoggedUser class="panel1" >
-			logged on User: <div  id=divLoggedUserName></div>
-			<button id=btnLogOff>log off</button>
-		</div>
-		
-		<div id=divFileBrowser class="panel1" >
-			<input type="file" style="display: none" id="inFile" />
-			<button id=btnBrowsFiles>Open File Dialog</button>	
-		</div>
-		
-			
-			
-		-->
-		
-		<!--**********************************************************-->
 		
 		<div id="divTopBar" style="display: flex; justify-content: flex-end">
 			<label id="labelLoggedUser"></label>
@@ -337,6 +273,18 @@
 			}
 			
 			
+			function clearLogOn(){
+				$("#logUesrText").val("");
+				$("#logPassText").val("");
+			}
+			
+			function clearRegister(){
+				$("#newUserText").val("");
+				$("#newUserPassWordText").val("");
+			}
+			
+			
+			
 			
 			function pageSwitchLoginReg(){
 				hideAllPages();
@@ -572,6 +520,7 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
+					clearRegister();
 					if(data.success){
 						//setPanelLoggedOn(userName);
 						loggedOnUserName=userName;
@@ -612,6 +561,7 @@
 				  success:function(data){
 					//console.log(data);
 					debugQuick(data);
+					clearLogOn();
 					if(data.success){
 						//setPanelLoggedOn(userName);
 						loggedOnUserName=userName;
