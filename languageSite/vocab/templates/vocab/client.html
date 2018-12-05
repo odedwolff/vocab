@@ -32,6 +32,7 @@
 				</div>	
 				<button id=btnLogOn>submit</button>
 			</div>
+			<button id="btnCancelLogOn">cancel</button>
 		</div>
 		
 		<div id="divPageRegister">
@@ -43,6 +44,7 @@
 				</div>	
 				<button id=btnAddUser>submit</button>
 			</div>
+			<button id="btnCancelReg">cancel</button>
 		</div>
 		
 		<div id="divPageSwitchAction">
@@ -281,6 +283,19 @@
 			function clearRegister(){
 				$("#newUserText").val("");
 				$("#newUserPassWordText").val("");
+			}
+			
+			
+			
+			function pageSwitchCancelLogOn(){
+				clearLogOn();
+				pageSwitchLoginReg();
+			}
+			
+			
+			function pageSwitchCancelReg(){
+				clearRegister();
+				pageSwitchLoginReg();
 			}
 			
 			
@@ -1136,23 +1151,7 @@
 				debugQuick(data);
 			}
 			
-			
-			
-			/*
-			function loadNextQuestion(){
-				data={
-					'srcLang':currentSelections.language,
-					'trgLang':currentSelections.languageNextQTarget,
-					'cats': listSelectedCats
-				} 
-			}
-			*/
-			
-			/*
-			srcLang=request.POST["srcLang"]	
-					trgLang=request.POST["trgLang"]
-					cats=request.POST.getlist("cats[]")
-			*/
+		
 
 			
 			function switchUser(){
@@ -1370,6 +1369,12 @@
 
 			$("#btnLeaveAddTrx").click(pageSwitchLeaveAddTrx);
 
+			$("#btnCancelLogOn").click(pageSwitchCancelLogOn);
+
+			$("#btnCancelReg").click(pageSwitchCancelReg);
+			
+			
+			
 			
 			
 			//when page first opens, get the logged on info from server 
