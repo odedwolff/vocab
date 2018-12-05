@@ -218,17 +218,8 @@
 			<!--<button id=btnBrowsFiles>Open File Dialog</button>	-->
 		</div>
 		
-		
-		
-		
-		<!--
-		<div id=divTest class="panel1" >
-			<button id=btnTest>Test</button>	
-		</div>
-		-->
-		
+	
 			
-		
 		<script>
 			
 			
@@ -1008,6 +999,7 @@
 					{(console.log("uploadDataObj succeed"))},
 				  error:function(error){
 					debugQuick(error.responseText);
+					alert(error.responseText);
 				  }
 				});
 			}
